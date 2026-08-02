@@ -7,6 +7,7 @@ export const useAuthStore = create(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -15,7 +16,13 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const { data } = await api.post('/auth/login', { email, password });
-          set({ user: data.user, token: data.token, isAuthenticated: true, isLoading: false });
+          set({
+            user: data.user,
+            token: data.token,
+            refreshToken: data.refreshToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
           return { success: true };
         } catch (err) {
           const error = err.response?.data?.error || 'Login failed';
@@ -28,7 +35,13 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const { data } = await api.post('/auth/register', { name, email, password, role });
-          set({ user: data.user, token: data.token, isAuthenticated: true, isLoading: false });
+          set({
+            user: data.user,
+            token: data.token,
+            refreshToken: data.refreshToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
           return { success: true };
         } catch (err) {
           const error = err.response?.data?.error || 'Registration failed';
@@ -37,18 +50,30 @@ export const useAuthStore = create(
         }
       },
 
+      refreshSession: async () => {
+        const { refreshToken } = get();
+        if (!refreshToken) { get().logout(); return; }
+        try {
+          const { data } = await api.post('/auth/refresh', { refreshToken });
+          set({ token: data.token, refreshToken: data.refreshToken, user: data.user });
+        } catch (_) {
+          get().logout();
+        }
+      },
+
       logout: async () => {
         try {
-          await api.post('/auth/logout');
-        } catch (e) {}
-        set({ user: null, token: null, isAuthenticated: false });
+          const { refreshToken } = get();
+          await api.post('/auth/logout', { refreshToken });
+        } catch (_) {}
+        set({ user: null, token: null, refreshToken: null, isAuthenticated: false });
       },
 
       refreshUser: async () => {
         try {
           const { data } = await api.get('/auth/me');
           set({ user: data.user });
-        } catch (e) {
+        } catch (_) {
           get().logout();
         }
       },
@@ -57,7 +82,12 @@ export const useAuthStore = create(
     }),
     {
       name: 'audittrail-auth',
-      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (s) => ({
+        token: s.token,
+        refreshToken: s.refreshToken,
+        user: s.user,
+        isAuthenticated: s.isAuthenticated,
+      }),
     }
   )
 );

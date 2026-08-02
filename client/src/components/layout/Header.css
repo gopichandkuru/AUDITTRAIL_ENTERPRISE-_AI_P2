@@ -1,87 +1,70 @@
+/* ─── Header ──────────────────────────────────────────────────────────── */
 .app-header {
   height: var(--header-height);
+  background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
-  background: rgba(8, 9, 14, 0.8);
-  backdrop-filter: blur(12px);
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 16px;
 }
 
-.header-left {
+.header-left { display: flex; align-items: center; gap: 16px; flex: 1; }
+
+.header-breadcrumb {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.header-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.header-subtitle {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 1px;
-  line-height: 1;
-}
+.breadcrumb-icon { font-size: 1.1rem; }
+.breadcrumb-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
-.header-time {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.header-divider {
-  width: 1px;
-  height: 24px;
-  background: var(--border);
-}
-
-.header-notif-btn {
-  position: relative;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  width: 38px;
-  height: 38px;
+.header-icon-btn {
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.15s;
+}
+.header-icon-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+
+.header-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
-.header-notif-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--border-hover);
+.header-user-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
+}
+
+.header-user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text-primary);
-}
-
-.notif-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: var(--critical);
-  color: white;
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: var(--radius-full);
-  min-width: 17px;
-  text-align: center;
-  border: 2px solid var(--bg-primary);
 }

@@ -4,19 +4,41 @@ import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import './Sidebar.css';
 
-const NAV_ITEMS = [
-  { path: '/dashboard', icon: '⊞', label: 'Dashboard' },
-  { path: '/logs', icon: '📋', label: 'Audit Logs' },
-  { path: '/ai-insights', icon: '🤖', label: 'AI Insights' },
-  { path: '/analytics', icon: '📊', label: 'Analytics' },
-  { path: '/reports', icon: '📄', label: 'Reports' },
-  { path: '/alerts', icon: '🔔', label: 'Alerts' },
-  { path: '/settings', icon: '⚙', label: 'Settings' },
+const navSections = [
+  {
+    label: 'Overview',
+    items: [
+      { to: '/dashboard',  icon: '📊', label: 'Dashboard' },
+    ],
+  },
+  {
+    label: 'Logistics',
+    items: [
+      { to: '/shipments',  icon: '🚢', label: 'Shipments' },
+      { to: '/timeline',   icon: '📅', label: 'Event Timeline' },
+      { to: '/scrubber',   icon: '⏮', label: 'State Scrubber' },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { to: '/analytics',  icon: '📈', label: 'Analytics' },
+      { to: '/events',     icon: '🗃', label: 'Event Log' },
+      { to: '/ai-insights',icon: '🤖', label: 'AI Insights' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { to: '/alerts',     icon: '🔔', label: 'Alerts' },
+      { to: '/reports',    icon: '📄', label: 'Reports' },
+      { to: '/settings',   icon: '⚙️',  label: 'Settings' },
+    ],
+  },
 ];
 
 export default function Sidebar() {
   const { user, logout } = useAuthStore();
-  const { unreadCount } = useUIStore();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -24,70 +46,49 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  const roleColors = {
-    admin: 'badge-critical',
-    auditor: 'badge-warning',
-    viewer: 'badge-info',
-  };
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   return (
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
-        <div className="logo-icon">
-          <span className="logo-shield">🛡</span>
+        <div className="sidebar-logo-icon">🛡</div>
+        <div className="sidebar-logo-text">
+          <div className="sidebar-logo-title">LogisticAI</div>
+          <div className="sidebar-logo-sub">Enterprise Ledger</div>
         </div>
-        <div className="logo-text">
-          <span className="logo-title">AuditTrail</span>
-          <span className="logo-sub">Enterprise AI</span>
-        </div>
-      </div>
-
-      {/* Live indicator */}
-      <div className="sidebar-live">
-        <span className="live-badge">
-          <span className="dot dot-pulse"></span>
-          Live Monitoring
-        </span>
       </div>
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        <div className="nav-section-label">Navigation</div>
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
-            {item.path === '/alerts' && unreadCount > 0 && (
-              <span className="nav-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
-            )}
-          </NavLink>
+        {navSections.map((section) => (
+          <div key={section.label} className="sidebar-section">
+            <div className="sidebar-section-label">{section.label}</div>
+            {section.items.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
+              >
+                <span className="sidebar-item-icon">{item.icon}</span>
+                <span className="sidebar-item-text">{item.label}</span>
+                {item.badge && <span className="sidebar-item-badge">{item.badge}</span>}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
 
-      {/* User info */}
+      {/* User footer */}
       <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="user-avatar">
-            {user?.name?.charAt(0).toUpperCase()}
+        <div className="sidebar-user" onClick={handleLogout} title="Click to logout">
+          <div className="sidebar-avatar">{initials}</div>
+          <div>
+            <div className="sidebar-user-name">{user?.name || 'User'}</div>
+            <div className="sidebar-user-role">{user?.role || 'viewer'} · Logout</div>
           </div>
-          <div className="user-info">
-            <div className="user-name">{user?.name}</div>
-            <span className={`badge badge-sm ${roleColors[user?.role] || 'badge-info'}`}>
-              {user?.role}
-            </span>
-          </div>
-          <button
-            className="btn btn-ghost btn-icon logout-btn"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            ⎋
-          </button>
         </div>
       </div>
     </aside>

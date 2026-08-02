@@ -26,7 +26,7 @@ const auditLogSchema = new mongoose.Schema({
   },
   userRole: {
     type: String,
-    enum: ['admin', 'auditor', 'viewer', 'system', 'api'],
+    enum: ['admin', 'manager', 'auditor', 'viewer', 'system', 'api'],
     default: 'viewer',
   },
   action: {

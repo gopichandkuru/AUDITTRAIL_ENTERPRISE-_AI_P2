@@ -5,16 +5,21 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Toast from './components/ui/Toast';
 
-// Pages
-import LoginPage from './pages/auth/LoginPage';
+// Auth pages
+import LoginPage    from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import AuditLogsPage from './pages/AuditLogsPage';
-import AIInsightsPage from './pages/AIInsightsPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import ReportsPage from './pages/ReportsPage';
-import AlertsPage from './pages/AlertsPage';
-import SettingsPage from './pages/SettingsPage';
+
+// Core pages
+import DashboardPage    from './pages/DashboardPage';
+import ShipmentsPage    from './pages/ShipmentsPage';
+import TimelinePage     from './pages/TimelinePage';
+import StateScrubberPage from './pages/StateScrubberPage';
+import AnalyticsPage    from './pages/AnalyticsPage';
+import AuditLogsPage    from './pages/AuditLogsPage';   // now Event Log
+import AIInsightsPage   from './pages/AIInsightsPage';
+import AlertsPage       from './pages/AlertsPage';
+import ReportsPage      from './pages/ReportsPage';
+import SettingsPage     from './pages/SettingsPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
@@ -32,28 +37,37 @@ const AppLayout = ({ children }) => (
   </div>
 );
 
+const P = ({ children }) => (
+  <ProtectedRoute>
+    <AppLayout>{children}</AppLayout>
+  </ProtectedRoute>
+);
+
 export default function App() {
   const { isAuthenticated } = useAuthStore();
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
+        {/* Public */}
+        <Route path="/login"    element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
         <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" /> : <RegisterPage />} />
 
-        {/* Protected routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><AppLayout><DashboardPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/logs" element={<ProtectedRoute><AppLayout><AuditLogsPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/ai-insights" element={<ProtectedRoute><AppLayout><AIInsightsPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><AppLayout><AnalyticsPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/reports" element={<ProtectedRoute><AppLayout><ReportsPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/alerts" element={<ProtectedRoute><AppLayout><AlertsPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
+        {/* Protected */}
+        <Route path="/dashboard"  element={<P><DashboardPage /></P>} />
+        <Route path="/shipments"  element={<P><ShipmentsPage /></P>} />
+        <Route path="/timeline"   element={<P><TimelinePage /></P>} />
+        <Route path="/scrubber"   element={<P><StateScrubberPage /></P>} />
+        <Route path="/analytics"  element={<P><AnalyticsPage /></P>} />
+        <Route path="/events"     element={<P><AuditLogsPage /></P>} />
+        <Route path="/ai-insights" element={<P><AIInsightsPage /></P>} />
+        <Route path="/alerts"     element={<P><AlertsPage /></P>} />
+        <Route path="/reports"    element={<P><ReportsPage /></P>} />
+        <Route path="/settings"   element={<P><SettingsPage /></P>} />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        {/* Redirects */}
+        <Route path="/"  element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} />} />
+        <Route path="*"  element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,41 +1,37 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { useUIStore } from '../store/uiStore';
+import { useAuthStore } from '../store/authStore';
 
 let socket = null;
 
-export const useSocket = (onNewLog) => {
-  const addNotification = useUIStore((s) => s.addNotification);
-  const mounted = useRef(false);
+/**
+ * useSocket — attach to the server's Socket.IO connection.
+ * @param {function} onEvent — called with each shipment_event payload
+ */
+export function useSocket(onEvent) {
+  const { token } = useAuthStore();
+  const onEventRef = useRef(onEvent);
+  onEventRef.current = onEvent;
 
   useEffect(() => {
-    if (mounted.current) return;
-    mounted.current = true;
+    if (!token) return;
 
-    socket = io('/', { transports: ['websocket', 'polling'] });
+    // Reuse existing connection
+    if (!socket) {
+      socket = io(window.location.origin, {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnectionDelay: 2000,
+      });
+    }
 
-    socket.on('connect', () => {
-      socket.emit('join_dashboard');
-    });
-
-    socket.on('new_log', (log) => {
-      if (onNewLog) onNewLog(log);
-    });
-
-    socket.on('alert_triggered', (notification) => {
-      addNotification(notification);
-    });
+    const handler = (data) => onEventRef.current?.(data);
+    socket.on('shipment_event', handler);
 
     return () => {
-      if (socket) {
-        socket.disconnect();
-        socket = null;
-        mounted.current = false;
-      }
+      socket.off('shipment_event', handler);
     };
-  }, []);
+  }, [token]);
+}
 
-  return socket;
-};
-
-export { socket };
+export default useSocket;

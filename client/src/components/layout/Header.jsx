@@ -1,44 +1,56 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import './Header.css';
 
-const PAGE_TITLES = {
-  '/dashboard': { title: 'Dashboard', subtitle: 'Real-time audit monitoring overview' },
-  '/logs': { title: 'Audit Logs', subtitle: 'Browse and filter all audit events' },
-  '/ai-insights': { title: 'AI Insights', subtitle: 'Gemini-powered anomaly detection & analysis' },
-  '/analytics': { title: 'Analytics', subtitle: 'Deep-dive charts and behavioral patterns' },
-  '/reports': { title: 'Reports', subtitle: 'Generate compliance reports' },
-  '/alerts': { title: 'Alerts', subtitle: 'Alert rules and notifications' },
-  '/settings': { title: 'Settings', subtitle: 'Users, API keys, and preferences' },
+const ROUTE_LABELS = {
+  '/dashboard':  { title: 'Dashboard',       icon: '📊' },
+  '/shipments':  { title: 'Shipments',        icon: '🚢' },
+  '/timeline':   { title: 'Event Timeline',   icon: '📅' },
+  '/scrubber':   { title: 'State Scrubber',   icon: '⏮' },
+  '/analytics':  { title: 'Analytics',        icon: '📈' },
+  '/events':     { title: 'Event Log',        icon: '🗃' },
+  '/ai-insights':{ title: 'AI Insights',      icon: '🤖' },
+  '/alerts':     { title: 'Alerts',           icon: '🔔' },
+  '/reports':    { title: 'Reports',          icon: '📄' },
+  '/settings':   { title: 'Settings',         icon: '⚙️' },
 };
 
 export default function Header() {
   const { pathname } = useLocation();
-  const { unreadCount, clearUnread } = useUIStore();
-  const page = PAGE_TITLES[pathname] || { title: 'AuditTrail', subtitle: '' };
+  const { user } = useAuthStore();
+  const { theme, toggleTheme } = useUIStore();
+  const page = ROUTE_LABELS[pathname] || { title: 'LogisticAI', icon: '🛡' };
 
   return (
     <header className="app-header">
       <div className="header-left">
-        <h1 className="header-title">{page.title}</h1>
-        {page.subtitle && <p className="header-subtitle">{page.subtitle}</p>}
-      </div>
-      <div className="header-right">
-        <div className="header-time">
-          {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        <div className="header-breadcrumb">
+          <span className="breadcrumb-icon">{page.icon}</span>
+          <span className="breadcrumb-title">{page.title}</span>
         </div>
-        <div className="header-divider" />
+      </div>
+
+      <div className="header-right">
+        {/* Theme Toggle */}
         <button
-          className="header-notif-btn"
-          onClick={clearUnread}
-          title="Notifications"
+          className="btn btn-ghost btn-icon header-icon-btn"
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          aria-label="Toggle theme"
         >
-          🔔
-          {unreadCount > 0 && (
-            <span className="notif-count">{unreadCount > 9 ? '9+' : unreadCount}</span>
-          )}
+          {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+
+        {/* User chip */}
+        <div className="header-user-chip">
+          <div className="header-user-dot" />
+          <span className="header-user-name">{user?.name?.split(' ')[0]}</span>
+          <span className={`badge badge-${user?.role === 'admin' ? 'critical' : user?.role === 'manager' ? 'warning' : 'info'}`}>
+            {user?.role}
+          </span>
+        </div>
       </div>
     </header>
   );

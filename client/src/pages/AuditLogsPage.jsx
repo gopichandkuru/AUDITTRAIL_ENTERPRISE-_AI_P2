@@ -1,312 +1,157 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import api from '../api/axios';
-import { useSocket } from '../hooks/useSocket';
-import { useUIStore } from '../store/uiStore';
-import SeverityBadge from '../components/ui/SeverityBadge';
+import { SkeletonTable } from '../components/ui/Skeleton';
 
-const SEVERITY_OPTIONS = ['', 'INFO', 'WARNING', 'CRITICAL', 'SUCCESS'];
-const STATUS_OPTIONS = ['', 'SUCCESS', 'FAILURE', 'PENDING'];
+const EVENT_ICONS = {
+  SHIPMENT_CREATED: '📦', ITEM_ADDED: '➕', ITEM_REMOVED: '➖',
+  TEMPERATURE_RECORDED: '🌡️', LOCATION_UPDATED: '📍', CONTAINER_LOADED: '🏗️',
+  IN_TRANSIT: '🚢', STATUS_CHANGED: '🔄', DELIVERED: '✅',
+  DELAYED: '⏰', TRANSFER_INITIATED: '🔀', SHIPMENT_CANCELLED: '❌',
+};
 
-export default function AuditLogsPage() {
-  const { showToast } = useUIStore();
-  const [logs, setLogs] = useState([]);
-  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1, limit: 50 });
+const EVENT_TYPES = Object.keys(EVENT_ICONS);
+
+export default function EventLogPage() {
+  const [events, setEvents] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
-  const [filters, setFilters] = useState({
-    search: '', severity: '', status: '', action: '', flagged: '', startDate: '', endDate: '',
-  });
-  const [sort, setSort] = useState({ sortBy: 'timestamp', sortOrder: 'desc' });
-  const debounceRef = useRef(null);
+  const [filters, setFilters] = useState({ page: 1, limit: 30, eventType: '', aggregateType: 'Shipment' });
+  const [expanded, setExpanded] = useState(null);
 
-  const fetchLogs = useCallback(async (page = 1, f = filters, s = sort) => {
+  const fetchEvents = async (f = filters) => {
     setLoading(true);
     try {
-      const params = { page, limit: 50, ...s };
-      Object.entries(f).forEach(([k, v]) => { if (v) params[k] = v; });
-      const { data } = await api.get('/logs', { params });
-      setLogs(data.logs);
-      setPagination(data.pagination);
+      const params = new URLSearchParams();
+      Object.entries(f).forEach(([k, v]) => { if (v) params.set(k, v); });
+      const { data } = await api.get(`/queries/events?${params}`);
+      setEvents(data.events || []);
+      setTotal(data.total || 0);
     } catch (e) {
-      showToast('Failed to load logs', 'error');
+      console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [filters, sort]);
-
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchLogs(1), 300);
-  }, [filters, sort]);
-
-  const handleNewLog = useCallback((log) => {
-    setLogs((prev) => [log, ...prev].slice(0, 50));
-  }, []);
-
-  useSocket(handleNewLog);
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSort = (field) => {
-    setSort((prev) => ({
-      sortBy: field,
-      sortOrder: prev.sortBy === field && prev.sortOrder === 'desc' ? 'asc' : 'desc',
-    }));
+  useEffect(() => { fetchEvents(); }, []);
+
+  const applyFilter = (key, value) => {
+    const next = { ...filters, [key]: value, page: 1 };
+    setFilters(next);
+    fetchEvents(next);
   };
 
-  const handleFlag = async (log) => {
-    try {
-      await api.patch(`/logs/${log.eventId}/flag`, { flagged: !log.flagged, flagReason: 'Manually flagged' });
-      setLogs((prev) => prev.map((l) => l.eventId === log.eventId ? { ...l, flagged: !l.flagged } : l));
-      showToast(log.flagged ? 'Event unflagged' : 'Event flagged', 'success');
-    } catch {
-      showToast('Action failed', 'error');
-    }
+  const setPage = (page) => {
+    const next = { ...filters, page };
+    setFilters(next);
+    fetchEvents(next);
   };
 
-  const SortIcon = ({ field }) => {
-    if (sort.sortBy !== field) return <span style={{ opacity: 0.3 }}>⇅</span>;
-    return <span style={{ color: 'var(--accent-light)' }}>{sort.sortOrder === 'desc' ? '↓' : '↑'}</span>;
-  };
-
-  const clearFilters = () => setFilters({ search: '', severity: '', status: '', action: '', flagged: '', startDate: '', endDate: '' });
+  const totalPages = Math.ceil(total / filters.limit);
 
   return (
     <div className="page-wrapper fade-in">
-      <div className="page-header flex items-center justify-between">
-        <div>
-          <h1 className="page-title">Audit Logs</h1>
-          <p className="page-subtitle">
-            {pagination.total.toLocaleString()} total events
-          </p>
-        </div>
-        <span className="live-badge"><span className="dot dot-pulse" />Live</span>
+      <div className="page-header">
+        <h1 className="page-title">Event Log</h1>
+        <p className="page-subtitle">Append-only global event stream — {total.toLocaleString()} events total</p>
       </div>
 
       {/* Filters */}
-      <div className="card" style={{ marginBottom: 20, padding: '16px 20px' }}>
-        <div className="filter-row">
-          <div className="search-wrapper flex-1" style={{ minWidth: 220 }}>
-            <span className="search-icon">🔍</span>
-            <input
-              name="search"
-              className="form-input"
-              placeholder="Search user, action, resource, IP…"
-              value={filters.search}
-              onChange={handleFilterChange}
-            />
-          </div>
-
-          <select name="severity" className="form-input form-select" value={filters.severity} onChange={handleFilterChange} style={{ width: 130 }}>
-            <option value="">All Severity</option>
-            {SEVERITY_OPTIONS.filter(Boolean).map((s) => <option key={s} value={s}>{s}</option>)}
+      <div className="card mb-4" style={{ padding: '16px 20px' }}>
+        <div className="flex items-center gap-3 flex-wrap">
+          <select
+            className="form-select"
+            style={{ maxWidth: 220 }}
+            value={filters.eventType}
+            onChange={(e) => applyFilter('eventType', e.target.value)}
+          >
+            <option value="">All Event Types</option>
+            {EVENT_TYPES.map((t) => (
+              <option key={t} value={t}>{EVENT_ICONS[t]} {t}</option>
+            ))}
           </select>
-
-          <select name="status" className="form-input form-select" value={filters.status} onChange={handleFilterChange} style={{ width: 120 }}>
-            <option value="">All Status</option>
-            {STATUS_OPTIONS.filter(Boolean).map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-
-          <select name="flagged" className="form-input form-select" value={filters.flagged} onChange={handleFilterChange} style={{ width: 120 }}>
-            <option value="">All Events</option>
-            <option value="true">Flagged Only</option>
-            <option value="false">Not Flagged</option>
-          </select>
-
-          <input
-            type="date"
-            name="startDate"
-            className="form-input"
-            value={filters.startDate}
-            onChange={handleFilterChange}
-            style={{ width: 140, colorScheme: 'dark' }}
-          />
-          <input
-            type="date"
-            name="endDate"
-            className="form-input"
-            value={filters.endDate}
-            onChange={handleFilterChange}
-            style={{ width: 140, colorScheme: 'dark' }}
-          />
-
-          <button className="btn btn-secondary btn-sm" onClick={clearFilters}>Clear</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => { const f = { ...filters, eventType: '', page: 1 }; setFilters(f); fetchEvents(f); }}>
+            Clear Filters
+          </button>
+          <span className="text-muted text-sm" style={{ marginLeft: 'auto' }}>
+            {total.toLocaleString()} events
+          </span>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card">
         {loading ? (
-          <div className="loading-center"><div className="spinner" /><p className="text-secondary" style={{ marginTop: 12 }}>Loading logs…</p></div>
+          <SkeletonTable rows={10} cols={6} />
         ) : (
-          <>
-            <div className="table-wrapper" style={{ border: 'none' }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th onClick={() => handleSort('severity')}>Severity <SortIcon field="severity" /></th>
-                    <th onClick={() => handleSort('timestamp')}>Timestamp <SortIcon field="timestamp" /></th>
-                    <th onClick={() => handleSort('userName')}>User <SortIcon field="userName" /></th>
-                    <th onClick={() => handleSort('action')}>Action <SortIcon field="action" /></th>
-                    <th>Resource</th>
-                    <th onClick={() => handleSort('status')}>Status <SortIcon field="status" /></th>
-                    <th onClick={() => handleSort('riskScore')}>Risk <SortIcon field="riskScore" /></th>
-                    <th>IP</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.length === 0 ? (
-                    <tr><td colSpan={9}>
-                      <div className="empty-state">
-                        <div className="empty-state-icon">🔍</div>
-                        <h3>No logs found</h3>
-                        <p>Try adjusting your filters or seed the database</p>
-                      </div>
-                    </td></tr>
-                  ) : logs.map((log) => (
-                    <tr
-                      key={log._id || log.eventId}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setSelected(log)}
-                    >
-                      <td><SeverityBadge severity={log.severity} /></td>
-                      <td className="td-mono" style={{ fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {format(new Date(log.timestamp), 'MMM d, HH:mm:ss')}
-                      </td>
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Event Type</th>
+                  <th>Aggregate ID</th>
+                  <th>Version</th>
+                  <th>By</th>
+                  <th>Timestamp</th>
+                  <th>Payload</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.length === 0 ? (
+                  <tr><td colSpan={6}>
+                    <div className="empty-state">
+                      <div className="empty-state-icon">🗃</div>
+                      <h3>No events found</h3>
+                      <p>Events will appear here as shipments are created and modified</p>
+                    </div>
+                  </td></tr>
+                ) : events.map((ev) => (
+                  <React.Fragment key={ev._id}>
+                    <tr className="slide-up" style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === ev._id ? null : ev._id)}>
                       <td>
-                        <div className="td-primary" style={{ fontSize: '0.85rem' }}>{log.userName}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{log.userRole}</div>
-                      </td>
-                      <td><span className="tag">{log.action}</span></td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{log.resource}</td>
-                      <td>
-                        <span className={`badge ${log.status === 'SUCCESS' ? 'badge-success' : log.status === 'FAILURE' ? 'badge-critical' : 'badge-info'}`}>
-                          {log.status}
+                        <span className="flex items-center gap-2">
+                          <span>{EVENT_ICONS[ev.eventType] || '📋'}</span>
+                          <span className="tag" style={{ fontSize: '0.75rem' }}>{ev.eventType}</span>
                         </span>
                       </td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <div className="risk-bar" style={{ width: 50 }}>
-                            <div
-                              className={`risk-fill ${log.riskScore >= 70 ? 'risk-fill-high' : log.riskScore >= 40 ? 'risk-fill-medium' : 'risk-fill-low'}`}
-                              style={{ width: `${log.riskScore}%` }}
-                            />
-                          </div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.riskScore}</span>
-                        </div>
+                      <td className="font-mono text-sm td-primary">{ev.aggregateId}</td>
+                      <td><span className="badge badge-neutral">v{ev.version}</span></td>
+                      <td className="text-secondary">{ev.metadata?.userName || '—'}</td>
+                      <td className="text-muted text-sm font-mono">
+                        {format(new Date(ev.timestamp), 'MMM d, HH:mm:ss')}
                       </td>
-                      <td className="td-mono" style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{log.ipAddress}</td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <button
-                          className={`btn btn-ghost btn-sm`}
-                          onClick={() => handleFlag(log)}
-                          title={log.flagged ? 'Unflag' : 'Flag'}
-                          style={{ color: log.flagged ? 'var(--warning)' : 'var(--text-muted)' }}
-                        >
-                          🚩
-                        </button>
+                      <td>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                          {expanded === ev._id ? '▲' : '▼'} expand
+                        </span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-              <div className="pagination">
-                <button
-                  className="pagination-btn"
-                  disabled={pagination.page === 1}
-                  onClick={() => fetchLogs(pagination.page - 1)}
-                >←</button>
-                {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${pagination.page === page ? 'active' : ''}`}
-                      onClick={() => fetchLogs(page)}
-                    >{page}</button>
-                  );
-                })}
-                {pagination.pages > 5 && <span style={{ color: 'var(--text-muted)', padding: '0 4px' }}>…</span>}
-                <button
-                  className="pagination-btn"
-                  disabled={pagination.page === pagination.pages}
-                  onClick={() => fetchLogs(pagination.page + 1)}
-                >→</button>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: 8 }}>
-                  {pagination.total.toLocaleString()} total
-                </span>
-              </div>
-            )}
-          </>
+                    {expanded === ev._id && (
+                      <tr>
+                        <td colSpan={6} style={{ background: 'var(--bg-elevated)', padding: '12px 16px' }}>
+                          <pre style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
+                            {JSON.stringify({ payload: ev.payload, metadata: ev.metadata }, null, 2)}
+                          </pre>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
 
-      {/* Log Detail Modal */}
-      {selected && (
-        <div className="modal-overlay" onClick={() => setSelected(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 640 }}>
-            <div className="modal-header">
-              <div className="flex items-center gap-3">
-                <SeverityBadge severity={selected.severity} />
-                <span className="modal-title">{selected.action}</span>
-              </div>
-              <button className="btn btn-ghost btn-icon" onClick={() => setSelected(null)}>✕</button>
-            </div>
-
-            <div className="grid grid-2" style={{ gap: 12 }}>
-              {[
-                ['Event ID', selected.eventId],
-                ['Timestamp', format(new Date(selected.timestamp), 'PPpp')],
-                ['User', selected.userName],
-                ['Email', selected.userEmail],
-                ['Role', selected.userRole],
-                ['Action', selected.action],
-                ['Resource', selected.resource],
-                ['Resource ID', selected.resourceId],
-                ['Status', selected.status],
-                ['Severity', selected.severity],
-                ['IP Address', selected.ipAddress],
-                ['Risk Score', `${selected.riskScore}/100`],
-                ['Source', selected.source],
-                ['Flagged', selected.flagged ? '🚩 Yes' : 'No'],
-              ].map(([k, v]) => (
-                <div key={k} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{k}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500, wordBreak: 'break-all' }}>{v || '—'}</div>
-                </div>
-              ))}
-            </div>
-
-            {selected.location?.country && (
-              <div style={{ marginTop: 12, background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Location</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                  📍 {selected.location.city}, {selected.location.country}
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-3" style={{ marginTop: 20 }}>
-              <button
-                className={`btn ${selected.flagged ? 'btn-secondary' : 'btn-danger'} btn-sm`}
-                onClick={() => { handleFlag(selected); setSelected(null); }}
-              >
-                🚩 {selected.flagged ? 'Unflag Event' : 'Flag Event'}
-              </button>
-              <button className="btn btn-secondary btn-sm" onClick={() => setSelected(null)}>Close</button>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between" style={{ padding: '16px 0 0', borderTop: '1px solid var(--border)' }}>
+            <span className="text-muted text-sm">Page {filters.page} of {totalPages}</span>
+            <div className="flex gap-2">
+              <button className="btn btn-secondary btn-sm" disabled={filters.page <= 1} onClick={() => setPage(filters.page - 1)}>← Prev</button>
+              <button className="btn btn-secondary btn-sm" disabled={filters.page >= totalPages} onClick={() => setPage(filters.page + 1)}>Next →</button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
