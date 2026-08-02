@@ -1,0 +1,43 @@
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.stat-card:hover::after { opacity: 1; }
+
+.stat-accent-critical::after { background: var(--gradient-critical); opacity: 1; }
+.stat-accent-warning::after { background: linear-gradient(90deg, #f59e0b, #d97706); opacity: 1; }
+.stat-accent-success::after { background: linear-gradient(90deg, #10b981, #059669); opacity: 1; }
+.stat-accent-info::after { background: linear-gradient(90deg, #3b82f6, #2563eb); opacity: 1; }
+
+.stat-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.stat-change-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
