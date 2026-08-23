@@ -51,6 +51,12 @@ const errorHandler = (err, req, res, next) => {
     message = err.message || 'Concurrency conflict — version mismatch';
   }
 
+  // Database Connection Error
+  if (err.name === 'MongoNetworkError' || err.name === 'MongoServerSelectionError' || err.message.includes('connect ECONNREFUSED')) {
+    statusCode = 503;
+    message = 'Service temporarily unavailable. Unable to connect to the database.';
+  }
+
   const response = {
     success: false,
     error: message,

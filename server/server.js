@@ -66,7 +66,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL 
+    ? (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : undefined)
     : (origin, callback) => callback(null, true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -134,24 +134,20 @@ initSocket(io);
 // ─── MongoDB + Server Start ───────────────────────────────────────────────
 const startServer = async () => {
   try {
-    // Try real MongoDB URI first (with short timeout)
     const mongoUri = process.env.MONGODB_URI;
-    if (mongoUri) {
-      try {
-        await mongoose.connect(mongoUri, {
-          serverSelectionTimeoutMS: 15000, // Increased timeout for slower connections
-          socketTimeoutMS: 45000,
-        });
-        console.log('✅ MongoDB Atlas connected');
-      } catch (err) {
-        console.log('⚠️  Atlas unreachable. Falling back to in-memory DB...');
-        mongoose.disconnect().catch(() => {});
-        await startWithMemoryDB();
-        return;
-      }
-    } else {
-      await startWithMemoryDB();
-      return;
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI environment variable is missing.');
+    }
+
+    try {
+      await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 15000, // Increased timeout for slower connections
+        socketTimeoutMS: 45000,
+      });
+      console.log('✅ MongoDB Atlas connected');
+    } catch (err) {
+      console.error('❌ MongoDB Atlas unreachable. Server cannot start.', err.message);
+      process.exit(1);
     }
 
     launchServer();
@@ -161,18 +157,7 @@ const startServer = async () => {
   }
 };
 
-const startWithMemoryDB = async () => {
-  const { MongoMemoryServer } = require('mongodb-memory-server');
-  const mongod = await MongoMemoryServer.create();
-  await mongoose.connect(mongod.getUri());
-  console.log('✅ In-memory MongoDB connected');
 
-  // Seed demo data
-  const { seedAll } = require('./src/scripts/seed');
-  await seedAll();
-
-  launchServer();
-};
 
 const launchServer = () => {
   // After DB connects, rebuild projections if needed
