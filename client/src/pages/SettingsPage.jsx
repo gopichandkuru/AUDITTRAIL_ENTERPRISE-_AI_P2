@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
 import { useUIStore } from '../store/uiStore';
 import { format } from 'date-fns';
+import { User, Users, Key, Settings, Copy, Eye, EyeOff, ShieldCheck, FileCheck, Lock, Activity, CreditCard } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -37,10 +38,10 @@ export default function SettingsPage() {
   };
 
   const TABS = [
-    { id: 'profile', label: '👤 Profile', roles: ['admin', 'auditor', 'viewer'] },
-    { id: 'users', label: '👥 Users', roles: ['admin'] },
-    { id: 'api', label: '🔑 API Keys', roles: ['admin', 'auditor', 'viewer'] },
-    { id: 'system', label: '⚙ System', roles: ['admin'] },
+    { id: 'profile', label: <span className="flex items-center gap-2"><User size={14} /> Profile</span>, roles: ['admin', 'auditor', 'viewer'] },
+    { id: 'users', label: <span className="flex items-center gap-2"><Users size={14} /> Users</span>, roles: ['admin'] },
+    { id: 'api', label: <span className="flex items-center gap-2"><Key size={14} /> API Keys</span>, roles: ['admin', 'auditor', 'viewer'] },
+    { id: 'system', label: <span className="flex items-center gap-2"><Settings size={14} /> System</span>, roles: ['admin'] },
   ];
 
   const visibleTabs = TABS.filter((t) => t.roles.includes(user?.role));
@@ -84,7 +85,7 @@ export default function SettingsPage() {
               background: 'var(--gradient-primary)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.5rem', fontWeight: 700, color: 'white', flexShrink: 0,
-              boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+              boxShadow: '0 4px 16px rgba(255,255,255,0.1)',
             }}>
               {user?.name?.charAt(0).toUpperCase()}
             </div>
@@ -177,10 +178,10 @@ export default function SettingsPage() {
                 value={showKey ? apiKey : '••••••••••••••••••••••••••••••••••••'}
                 readOnly
               />
-              <button className="btn btn-secondary" onClick={() => setShowKey((s) => !s)}>
-                {showKey ? '🙈 Hide' : '👁 Show'}
+              <button className="btn btn-secondary flex items-center gap-2" onClick={() => setShowKey((s) => !s)}>
+                {showKey ? <><EyeOff size={14} /> Hide</> : <><Eye size={14} /> Show</>}
               </button>
-              <button className="btn btn-primary" onClick={copyApiKey}>📋 Copy</button>
+              <button className="btn btn-primary flex items-center gap-2" onClick={copyApiKey}><Copy size={14} /> Copy</button>
             </div>
           </div>
 
@@ -190,13 +191,13 @@ export default function SettingsPage() {
               Send audit events from any service using a simple HTTP POST:
             </p>
             <pre style={{
-              background: '#070810',
+              background: 'var(--bg-elevated)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)',
               padding: '16px 18px',
               fontSize: '0.78rem',
               fontFamily: 'var(--font-mono)',
-              color: '#a5b4fc',
+              color: 'var(--text-primary)',
               overflow: 'auto',
               lineHeight: 1.7,
             }}>
@@ -207,13 +208,13 @@ export default function SettingsPage() {
           <div className="card">
             <div className="card-title">Event Schema</div>
             <pre style={{
-              background: '#070810',
+              background: 'var(--bg-elevated)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)',
               padding: '16px 18px',
               fontSize: '0.78rem',
               fontFamily: 'var(--font-mono)',
-              color: '#6ee7b7',
+              color: 'var(--text-secondary)',
               lineHeight: 1.7,
             }}>{`{
   "eventId": "string (optional, auto-generated)",
@@ -261,11 +262,11 @@ export default function SettingsPage() {
             <div className="card-title">Compliance Standards</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { name: 'SOC 2 Type II', status: 'Supported', icon: '🏛' },
-                { name: 'GDPR', status: 'Supported', icon: '🇪🇺' },
-                { name: 'ISO 27001', status: 'Supported', icon: '🔐' },
-                { name: 'HIPAA', status: 'Partial', icon: '🏥' },
-                { name: 'PCI DSS', status: 'Partial', icon: '💳' },
+                { name: 'SOC 2 Type II', status: 'Supported', icon: <ShieldCheck size={16} /> },
+                { name: 'GDPR', status: 'Supported', icon: <FileCheck size={16} /> },
+                { name: 'ISO 27001', status: 'Supported', icon: <Lock size={16} /> },
+                { name: 'HIPAA', status: 'Partial', icon: <Activity size={16} /> },
+                { name: 'PCI DSS', status: 'Partial', icon: <CreditCard size={16} /> },
               ].map((s) => (
                 <div key={s.name} className="flex items-center justify-between" style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
                   <div className="flex items-center gap-2">

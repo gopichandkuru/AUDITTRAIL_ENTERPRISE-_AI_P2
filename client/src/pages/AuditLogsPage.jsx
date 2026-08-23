@@ -2,12 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import api from '../api/axios';
 import { SkeletonTable } from '../components/ui/Skeleton';
+import { 
+  Package, PlusSquare, MinusSquare, Thermometer, MapPin, Anchor, 
+  Truck, RotateCw, CheckCircle2, AlertTriangle, Shuffle, XCircle, 
+  Archive, ChevronDown, ChevronUp, Clock3 
+} from 'lucide-react';
 
 const EVENT_ICONS = {
-  SHIPMENT_CREATED: '📦', ITEM_ADDED: '➕', ITEM_REMOVED: '➖',
-  TEMPERATURE_RECORDED: '🌡️', LOCATION_UPDATED: '📍', CONTAINER_LOADED: '🏗️',
-  IN_TRANSIT: '🚢', STATUS_CHANGED: '🔄', DELIVERED: '✅',
-  DELAYED: '⏰', TRANSFER_INITIATED: '🔀', SHIPMENT_CANCELLED: '❌',
+  SHIPMENT_CREATED: <Package size={14} />, ITEM_ADDED: <PlusSquare size={14} />, ITEM_REMOVED: <MinusSquare size={14} />,
+  TEMPERATURE_RECORDED: <Thermometer size={14} />, LOCATION_UPDATED: <MapPin size={14} />, CONTAINER_LOADED: <Anchor size={14} />,
+  IN_TRANSIT: <Truck size={14} />, STATUS_CHANGED: <RotateCw size={14} />, DELIVERED: <CheckCircle2 size={14} />,
+  DELAYED: <AlertTriangle size={14} />, TRANSFER_INITIATED: <Shuffle size={14} />, SHIPMENT_CANCELLED: <XCircle size={14} />,
 };
 
 const EVENT_TYPES = Object.keys(EVENT_ICONS);
@@ -68,7 +73,7 @@ export default function EventLogPage() {
           >
             <option value="">All Event Types</option>
             {EVENT_TYPES.map((t) => (
-              <option key={t} value={t}>{EVENT_ICONS[t]} {t}</option>
+              <option key={t} value={t}>{t}</option>
             ))}
           </select>
           <button className="btn btn-secondary btn-sm" onClick={() => { const f = { ...filters, eventType: '', page: 1 }; setFilters(f); fetchEvents(f); }}>
@@ -100,7 +105,7 @@ export default function EventLogPage() {
                 {events.length === 0 ? (
                   <tr><td colSpan={6}>
                     <div className="empty-state">
-                      <div className="empty-state-icon">🗃</div>
+                      <div className="empty-state-icon"><Archive size={32} /></div>
                       <h3>No events found</h3>
                       <p>Events will appear here as shipments are created and modified</p>
                     </div>
@@ -110,7 +115,7 @@ export default function EventLogPage() {
                     <tr className="slide-up" style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === ev._id ? null : ev._id)}>
                       <td>
                         <span className="flex items-center gap-2">
-                          <span>{EVENT_ICONS[ev.eventType] || '📋'}</span>
+                          <span style={{ display: 'flex' }}>{EVENT_ICONS[ev.eventType] || <Clock3 size={14} />}</span>
                           <span className="tag" style={{ fontSize: '0.75rem' }}>{ev.eventType}</span>
                         </span>
                       </td>
@@ -121,8 +126,8 @@ export default function EventLogPage() {
                         {format(new Date(ev.timestamp), 'MMM d, HH:mm:ss')}
                       </td>
                       <td>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                          {expanded === ev._id ? '▲' : '▼'} expand
+                        <span className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                          {expanded === ev._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />} expand
                         </span>
                       </td>
                     </tr>

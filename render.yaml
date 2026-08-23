@@ -1,11 +1,10 @@
 services:
-  # ─── Backend API ───────────────────────────────────────────────────
   - type: web
-    name: audittrail-enterprise-api
+    name: audittrail-enterprise
     env: node
     region: oregon
     plan: free
-    buildCommand: cd server && npm install
+    buildCommand: cd client && npm install && npm run build && cd ../server && npm install
     startCommand: cd server && node server.js
     healthCheckPath: /api/health
     envVars:
@@ -21,26 +20,3 @@ services:
         sync: false   # Set manually in Render dashboard
       - key: GEMINI_API_KEY
         sync: false   # Set manually in Render dashboard
-      - key: CLIENT_URL
-        sync: false   # Set to your frontend Render URL
-
-  # ─── Frontend Static Site ──────────────────────────────────────────
-  - type: web
-    name: audittrail-enterprise-ui
-    env: static
-    region: oregon
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    pullRequestPreviewsEnabled: true
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff

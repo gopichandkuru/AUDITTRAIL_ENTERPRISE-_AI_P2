@@ -3,10 +3,10 @@ import { useUIStore } from '../../store/uiStore';
 
 const ICON = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
 const COLORS = {
-  success: { bg: 'var(--success)', border: 'rgba(16,185,129,0.4)' },
-  error:   { bg: 'var(--danger)',  border: 'rgba(239,68,68,0.4)' },
-  warning: { bg: 'var(--warning)', border: 'rgba(245,158,11,0.4)' },
-  info:    { bg: 'var(--accent)',  border: 'rgba(99,102,241,0.4)' },
+  success: { bg: 'var(--bg-elevated)', border: 'var(--border)' },
+  error:   { bg: 'var(--bg-elevated)',  border: 'var(--text-primary)' },
+  warning: { bg: 'var(--bg-elevated)', border: 'var(--text-muted)' },
+  info:    { bg: 'var(--bg-elevated)',  border: 'var(--border)' },
 };
 
 export default function Toast() {
@@ -31,7 +31,7 @@ export default function Toast() {
               border: `1px solid ${c.border}`,
               borderRadius: 'var(--radius-md)',
               padding: '12px 16px',
-              color: 'white',
+              color: 'var(--text-primary)',
               fontSize: '0.875rem',
               fontWeight: 500,
               display: 'flex',

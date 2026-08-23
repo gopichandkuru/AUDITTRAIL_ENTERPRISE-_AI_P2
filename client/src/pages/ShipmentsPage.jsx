@@ -4,18 +4,19 @@ import { useAuthStore } from '../store/authStore';
 import { useShipmentStore } from '../store/shipmentStore';
 import Modal from '../components/ui/Modal';
 import { SkeletonTable, SkeletonCard } from '../components/ui/Skeleton';
+import { Package, Search, Plus, ArrowRight, CheckCircle2, XCircle, Clock } from 'lucide-react';
 
 const STATUSES = ['PENDING', 'PROCESSING', 'IN_TRANSIT', 'AT_PORT', 'CUSTOMS', 'DELIVERED', 'DELAYED', 'CANCELLED'];
 
 const STATUS_BADGE = {
-  PENDING:    'badge-warning',
-  PROCESSING: 'badge-info',
+  PENDING:    'badge-neutral',
+  PROCESSING: 'badge-neutral',
   IN_TRANSIT: 'badge-accent',
-  AT_PORT:    'badge-purple',
-  CUSTOMS:    'badge-purple',
+  AT_PORT:    'badge-neutral',
+  CUSTOMS:    'badge-warning',
   DELIVERED:  'badge-success',
-  DELAYED:    'badge-critical',
-  CANCELLED:  'badge-neutral',
+  DELAYED:    'badge-warning',
+  CANCELLED:  'badge-danger',
 };
 
 const emptyForm = {
@@ -98,12 +99,14 @@ export default function ShipmentsPage() {
       {toast && (
         <div style={{
           position: 'fixed', top: 80, right: 24, zIndex: 999,
-          background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)',
-          color: 'white', padding: '12px 20px', borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+          color: 'var(--text-primary)', padding: '12px 20px', borderRadius: 'var(--radius-md)',
           boxShadow: 'var(--shadow-lg)', fontSize: '0.875rem', fontWeight: 500,
+          display: 'flex', alignItems: 'center', gap: 10,
           animation: 'slideUp 0.25s ease',
         }}>
-          {toast.type === 'error' ? '❌' : '✅'} {toast.msg}
+          {toast.type === 'error' ? <XCircle size={18} color="var(--danger)" /> : <CheckCircle2 size={18} color="var(--success)" />}
+          {toast.msg}
         </div>
       )}
 
@@ -113,8 +116,8 @@ export default function ShipmentsPage() {
           <p className="page-subtitle">{total} shipment{total !== 1 ? 's' : ''} total</p>
         </div>
         {canWrite && (
-          <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-            + New Shipment
+          <button className="btn btn-primary" onClick={() => setCreateOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={16} /> New Shipment
           </button>
         )}
       </div>
@@ -122,13 +125,16 @@ export default function ShipmentsPage() {
       {/* Filters */}
       <div className="card mb-4" style={{ padding: '16px 20px' }}>
         <div className="flex items-center gap-3 flex-wrap">
-          <input
-            className="form-input"
-            style={{ maxWidth: 280 }}
-            placeholder="🔍 Search by ID, container, carrier, city..."
-            value={filters.search || ''}
-            onChange={(e) => setFilter('search', e.target.value)}
-          />
+          <div style={{ position: 'relative', maxWidth: 280, width: '100%' }}>
+            <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              className="form-input"
+              style={{ paddingLeft: 36 }}
+              placeholder="Search by ID, container..."
+              value={filters.search || ''}
+              onChange={(e) => setFilter('search', e.target.value)}
+            />
+          </div>
           <select
             className="form-select"
             style={{ maxWidth: 180 }}
@@ -171,7 +177,7 @@ export default function ShipmentsPage() {
                   <tr>
                     <td colSpan={8}>
                       <div className="empty-state">
-                        <div className="empty-state-icon">🚢</div>
+                        <div className="empty-state-icon"><Package size={32} /></div>
                         <h3>No shipments found</h3>
                         <p>Create your first shipment to get started</p>
                       </div>
@@ -187,8 +193,8 @@ export default function ShipmentsPage() {
                         </span>
                       </td>
                       <td>
-                        <span style={{ fontSize: '0.83rem' }}>
-                          {s.origin?.city || '—'} <span className="text-muted">→</span> {s.destination?.city || '—'}
+                        <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}>
+                          {s.origin?.city || '—'} <ArrowRight size={14} className="text-muted" /> {s.destination?.city || '—'}
                         </span>
                       </td>
                       <td className="text-secondary">{s.carrier || '—'}</td>
@@ -249,7 +255,11 @@ export default function ShipmentsPage() {
       <Modal
         isOpen={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="🚢 Create New Shipment"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Package size={20} /> Create New Shipment
+          </div>
+        }
         size="lg"
         footer={
           <>

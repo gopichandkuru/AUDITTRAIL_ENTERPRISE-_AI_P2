@@ -13,17 +13,17 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--gradient-primary);
+  background: var(--text-primary);
   opacity: 0;
   transition: var(--transition);
 }
 
 .stat-card:hover::after { opacity: 1; }
 
-.stat-accent-critical::after { background: var(--gradient-critical); opacity: 1; }
-.stat-accent-warning::after { background: linear-gradient(90deg, #f59e0b, #d97706); opacity: 1; }
-.stat-accent-success::after { background: linear-gradient(90deg, #10b981, #059669); opacity: 1; }
-.stat-accent-info::after { background: linear-gradient(90deg, #3b82f6, #2563eb); opacity: 1; }
+.stat-accent-critical::after { background: var(--text-primary); opacity: 1; }
+.stat-accent-warning::after { background: var(--text-secondary); opacity: 1; }
+.stat-accent-success::after { background: var(--text-secondary); opacity: 1; }
+.stat-accent-info::after { background: var(--text-muted); opacity: 1; }
 
 .stat-card-top {
   display: flex;

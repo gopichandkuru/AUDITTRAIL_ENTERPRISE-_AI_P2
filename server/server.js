@@ -23,6 +23,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const mongoSanitize = require('express-mongo-sanitize');
 const mongoose = require('mongoose');
+const path = require('path');
 
 // ─── Middleware imports ────────────────────────────────────────────────────
 const { errorHandler } = require('./src/middleware/errorHandler');
@@ -105,9 +106,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
+// ─── Serve Frontend in Production ───────────────────────────────────────
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({ success: false, error: `Route ${req.method} ${req.path} not found` });
+});
+
+// React Router catch-all
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // ─── Central Error Handler (MUST be last middleware) ─────────────────────
@@ -124,7 +133,7 @@ const startServer = async () => {
     if (mongoUri) {
       try {
         await mongoose.connect(mongoUri, {
-          serverSelectionTimeoutMS: 3000,
+          serverSelectionTimeoutMS: 15000, // Increased timeout for slower connections
           socketTimeoutMS: 45000,
         });
         console.log('✅ MongoDB Atlas connected');
