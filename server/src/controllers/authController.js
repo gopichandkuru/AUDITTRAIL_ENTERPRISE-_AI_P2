@@ -40,8 +40,18 @@ const register = asyncHandler(async (req, res) => {
   if (!name || !email || !password) {
     throw createError('Name, email, and password are required', 400);
   }
+  
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  if (!emailRegex.test(email)) {
+    throw createError('Invalid email address', 400);
+  }
+  
+  if (password.length < 8) {
+    throw createError('Password must contain at least 8 characters', 400);
+  }
+
   const existing = await User.findOne({ email });
-  if (existing) throw createError('Email already registered', 409);
+  if (existing) throw createError('An account with this email already exists.', 409);
 
   const user = await User.create({
     name, email, password,

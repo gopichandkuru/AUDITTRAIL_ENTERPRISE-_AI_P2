@@ -6,11 +6,12 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String, required: true, unique: true,
     lowercase: true, trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
   },
   password: { type: String, required: true, minlength: 6 },
   role: {
     type: String,
-    enum: ['admin', 'manager', 'viewer'],
+    enum: ['admin', 'manager', 'auditor', 'viewer'],
     default: 'viewer',
   },
   avatar: { type: String },
