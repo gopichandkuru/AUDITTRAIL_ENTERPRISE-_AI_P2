@@ -28,7 +28,7 @@ services:
   - type: web
     name: audittrail-enterprise-ui
     env: static
-    region: oregon
+   
     plan: free
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
