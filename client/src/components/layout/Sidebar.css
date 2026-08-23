@@ -5,8 +5,8 @@
   position: fixed;
   left: 0;
   top: 0;
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-strong);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -17,27 +17,22 @@
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  padding: 18px 20px;
+  height: 72px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-logo-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px var(--accent-glow);
+  color: #FFFFFF;
 }
 
-.sidebar-logo-text { line-height: 1.2; }
-.sidebar-logo-title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
-.sidebar-logo-sub   { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.sidebar-logo-text { line-height: 1.1; }
+.sidebar-logo-title { font-size: 1rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.01em; }
+.sidebar-logo-sub   { font-size: 0.65rem; color: #92989B; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
 
 .sidebar-nav {
   flex: 1;
@@ -51,42 +46,47 @@
 
 .sidebar-section-label {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  padding: 6px 10px;
-  margin-bottom: 2px;
+  letter-spacing: 0.06em;
+  color: #687076;
+  padding: 8px 12px;
+  margin-bottom: 4px;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-md);
+  gap: 12px;
+  padding: 0 12px;
+  height: 42px;
+  border-radius: 6px;
   text-decoration: none;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  color: #92989B;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.15s ease;
   cursor: pointer;
   border: none;
-  background: none;
+  background: transparent;
   width: 100%;
   text-align: left;
   margin-bottom: 2px;
 }
 
 .sidebar-item:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--sidebar-hover);
+  color: #FFFFFF;
 }
 
 .sidebar-item.active {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border: 1px solid rgba(99,102,241,0.15);
+  background: rgba(47,111,109,0.14);
+  color: #FFFFFF;
+  border: none;
+}
+
+.sidebar-item.active .sidebar-item-icon {
+  color: #6FA6A3;
 }
 
 .sidebar-item-icon {
@@ -109,35 +109,36 @@
 }
 
 .sidebar-footer {
-  padding: 12px 10px;
-  border-top: 1px solid var(--border);
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
+  gap: 12px;
+  padding: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.sidebar-user:hover { background: var(--bg-hover); }
+.sidebar-user:hover { background: var(--sidebar-hover); }
 
 .sidebar-avatar {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
+  background: #181B1D;
+  border: 1px solid #2A2F33;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
-  font-weight: 700;
-  color: white;
+  font-weight: 600;
+  color: #FFFFFF;
   flex-shrink: 0;
 }
 
-.sidebar-user-name { font-size: 0.83rem; font-weight: 600; color: var(--text-primary); }
-.sidebar-user-role { font-size: 0.7rem; color: var(--text-muted); text-transform: capitalize; }
+.sidebar-user-name { font-size: 0.85rem; font-weight: 600; color: #FFFFFF; }
+.sidebar-user-role { font-size: 0.65rem; color: #687076; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px;}

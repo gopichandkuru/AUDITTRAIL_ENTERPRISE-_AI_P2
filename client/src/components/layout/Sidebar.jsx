@@ -1,38 +1,39 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Package, Clock3, Rewind, ChartNoAxesCombined, ScrollText, Sparkles, Bell, FileText, Settings, Shield } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import './Sidebar.css';
 
 const navSections = [
   {
-    label: 'Overview',
+    label: 'OVERVIEW',
     items: [
-      { to: '/dashboard',  icon: '📊', label: 'Dashboard' },
+      { to: '/dashboard',  icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
     ],
   },
   {
-    label: 'Logistics',
+    label: 'LOGISTICS',
     items: [
-      { to: '/shipments',  icon: '🚢', label: 'Shipments' },
-      { to: '/timeline',   icon: '📅', label: 'Event Timeline' },
-      { to: '/scrubber',   icon: '⏮', label: 'State Scrubber' },
+      { to: '/shipments',  icon: <Package size={18} />, label: 'Shipments' },
+      { to: '/timeline',   icon: <Clock3 size={18} />, label: 'Event Timeline' },
+      { to: '/scrubber',   icon: <Rewind size={18} />, label: 'State Scrubber' },
     ],
   },
   {
-    label: 'Insights',
+    label: 'INSIGHTS',
     items: [
-      { to: '/analytics',  icon: '📈', label: 'Analytics' },
-      { to: '/events',     icon: '🗃', label: 'Event Log' },
-      { to: '/ai-insights',icon: '🤖', label: 'AI Insights' },
+      { to: '/analytics',  icon: <ChartNoAxesCombined size={18} />, label: 'Analytics' },
+      { to: '/events',     icon: <ScrollText size={18} />, label: 'Event Log' },
+      { to: '/ai-insights',icon: <Sparkles size={18} />, label: 'AI Insights' },
     ],
   },
   {
-    label: 'System',
+    label: 'SYSTEM',
     items: [
-      { to: '/alerts',     icon: '🔔', label: 'Alerts' },
-      { to: '/reports',    icon: '📄', label: 'Reports' },
-      { to: '/settings',   icon: '⚙️',  label: 'Settings' },
+      { to: '/alerts',     icon: <Bell size={18} />, label: 'Alerts' },
+      { to: '/reports',    icon: <FileText size={18} />, label: 'Reports' },
+      { to: '/settings',   icon: <Settings size={18} />,  label: 'Settings' },
     ],
   },
 ];
@@ -54,10 +55,12 @@ export default function Sidebar() {
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">🛡</div>
+        <div className="sidebar-logo-icon">
+          <Shield size={28} strokeWidth={1.5} />
+        </div>
         <div className="sidebar-logo-text">
           <div className="sidebar-logo-title">LogisticAI</div>
-          <div className="sidebar-logo-sub">Enterprise Ledger</div>
+          <div className="sidebar-logo-sub">ENTERPRISE LEDGER</div>
         </div>
       </div>
 

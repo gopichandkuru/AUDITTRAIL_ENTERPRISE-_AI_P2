@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { ShieldCheck, AlertTriangle, Check, ArrowRight } from 'lucide-react';
 import './Auth.css';
 
 export default function LoginPage() {
@@ -40,7 +41,7 @@ export default function LoginPage() {
       <div className="auth-container">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="auth-logo-icon">🛡</div>
+          <div className="auth-logo-icon flex items-center justify-center"><ShieldCheck size={36} className="text-accent" /></div>
           <div>
             <div className="auth-logo-title">AuditTrail</div>
             <div className="auth-logo-sub">Enterprise AI</div>
@@ -52,8 +53,8 @@ export default function LoginPage() {
           <p className="auth-subtitle">Monitor, analyze, and secure your audit trails</p>
 
           {error && (
-            <div className="auth-error">
-              <span>⚠</span> {error}
+            <div className="auth-error flex items-center gap-2">
+              <AlertTriangle size={16} /> {error}
             </div>
           )}
 
@@ -88,13 +89,13 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="btn btn-primary auth-submit-btn"
+              className="btn btn-primary auth-submit-btn flex justify-center items-center gap-2"
               disabled={isLoading}
             >
               {isLoading ? (
                 <><span className="spinner spinner-sm" /> Signing in...</>
               ) : (
-                'Sign In →'
+                <>Sign In <ArrowRight size={16} /></>
               )}
             </button>
           </form>
@@ -123,7 +124,7 @@ export default function LoginPage() {
 
         <div className="auth-features">
           {['Real-time log monitoring', 'AI anomaly detection', 'SOC 2 & GDPR compliance'].map((f) => (
-            <span key={f} className="auth-feature-tag">✓ {f}</span>
+            <span key={f} className="auth-feature-tag flex items-center gap-1"><Check size={14} className="text-accent" /> {f}</span>
           ))}
         </div>
       </div>

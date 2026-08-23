@@ -2,23 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import api from '../api/axios';
 import { SkeletonTable } from '../components/ui/Skeleton';
+import { 
+  Package, PlusSquare, MinusSquare, Thermometer, MapPin, Anchor, 
+  Truck, RotateCw, CheckCircle2, AlertTriangle, Shuffle, XCircle, 
+  Clock3, User, Server, ChevronDown 
+} from 'lucide-react';
 
 const EVENT_COLORS = {
-  SHIPMENT_CREATED:    { bg: 'rgba(16,185,129,0.12)', border: '#10b981', color: '#10b981',   icon: '📦' },
-  ITEM_ADDED:          { bg: 'rgba(59,130,246,0.12)',  border: '#3b82f6', color: '#3b82f6',   icon: '➕' },
-  ITEM_REMOVED:        { bg: 'rgba(239,68,68,0.12)',   border: '#ef4444', color: '#ef4444',   icon: '➖' },
-  TEMPERATURE_RECORDED:{ bg: 'rgba(245,158,11,0.12)', border: '#f59e0b', color: '#f59e0b',   icon: '🌡️' },
-  LOCATION_UPDATED:    { bg: 'rgba(99,102,241,0.12)',  border: '#6366f1', color: '#6366f1',   icon: '📍' },
-  CONTAINER_LOADED:    { bg: 'rgba(139,92,246,0.12)', border: '#8b5cf6', color: '#8b5cf6',   icon: '🏗️' },
-  IN_TRANSIT:          { bg: 'rgba(99,102,241,0.12)',  border: '#6366f1', color: '#6366f1',   icon: '🚢' },
-  STATUS_CHANGED:      { bg: 'rgba(245,158,11,0.12)', border: '#f59e0b', color: '#f59e0b',   icon: '🔄' },
-  DELIVERED:           { bg: 'rgba(16,185,129,0.12)', border: '#10b981', color: '#10b981',   icon: '✅' },
-  DELAYED:             { bg: 'rgba(239,68,68,0.12)',  border: '#ef4444', color: '#ef4444',   icon: '⏰' },
-  TRANSFER_INITIATED:  { bg: 'rgba(139,92,246,0.12)', border: '#8b5cf6', color: '#8b5cf6',   icon: '🔀' },
-  SHIPMENT_CANCELLED:  { bg: 'rgba(107,114,128,0.12)',border: '#6b7280', color: '#6b7280',   icon: '❌' },
+  SHIPMENT_CREATED:    { bg: 'var(--bg-elevated)', border: 'var(--text-secondary)', color: 'var(--text-secondary)',   icon: <Package size={16} /> },
+  ITEM_ADDED:          { bg: 'var(--bg-elevated)', border: 'var(--text-primary)', color: 'var(--text-primary)',   icon: <PlusSquare size={16} /> },
+  ITEM_REMOVED:        { bg: 'var(--bg-elevated)', border: 'var(--text-primary)', color: 'var(--text-primary)',   icon: <MinusSquare size={16} /> },
+  TEMPERATURE_RECORDED:{ bg: 'var(--bg-elevated)', border: 'var(--text-muted)', color: 'var(--text-muted)',   icon: <Thermometer size={16} /> },
+  LOCATION_UPDATED:    { bg: 'var(--bg-elevated)', border: 'var(--text-secondary)', color: 'var(--text-secondary)',   icon: <MapPin size={16} /> },
+  CONTAINER_LOADED:    { bg: 'var(--bg-elevated)', border: 'var(--text-secondary)', color: 'var(--text-secondary)',   icon: <Anchor size={16} /> },
+  IN_TRANSIT:          { bg: 'var(--bg-elevated)', border: 'var(--text-primary)', color: 'var(--text-primary)',   icon: <Truck size={16} /> },
+  STATUS_CHANGED:      { bg: 'var(--bg-elevated)', border: 'var(--text-muted)', color: 'var(--text-muted)',   icon: <RotateCw size={16} /> },
+  DELIVERED:           { bg: 'var(--bg-elevated)', border: 'var(--text-primary)', color: 'var(--text-primary)',   icon: <CheckCircle2 size={16} /> },
+  DELAYED:             { bg: 'var(--bg-elevated)', border: 'var(--text-primary)', color: 'var(--text-primary)',   icon: <AlertTriangle size={16} /> },
+  TRANSFER_INITIATED:  { bg: 'var(--bg-elevated)', border: 'var(--text-secondary)', color: 'var(--text-secondary)',   icon: <Shuffle size={16} /> },
+  SHIPMENT_CANCELLED:  { bg: 'var(--bg-elevated)', border: 'var(--text-muted)', color: 'var(--text-muted)',   icon: <XCircle size={16} /> },
 };
 
-const DEFAULT_EVENT = { bg: 'rgba(99,102,241,0.1)', border: '#6366f1', color: '#6366f1', icon: '📋' };
+const DEFAULT_EVENT = { bg: 'var(--bg-elevated)', border: 'var(--text-secondary)', color: 'var(--text-secondary)', icon: <Clock3 size={16} /> };
 
 function EventCard({ event, isLast }) {
   const [expanded, setExpanded] = useState(false);
@@ -63,35 +68,37 @@ function EventCard({ event, isLast }) {
               <span className="text-muted text-sm font-mono">
                 {format(new Date(event.timestamp), 'MMM d, yyyy HH:mm:ss')}
               </span>
-              <span style={{ color: 'var(--text-muted)', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                ▾
-              </span>
+              <div style={{ color: 'var(--text-muted)', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'flex' }}>
+                <ChevronDown size={18} />
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4" style={{ marginTop: 8 }}>
             {event.metadata?.userName && (
-              <span className="text-sm text-secondary">
-                👤 {event.metadata.userName}
+              <span className="text-sm text-secondary flex items-center gap-1">
+                <User size={14} /> {event.metadata.userName}
               </span>
             )}
             {event.metadata?.userRole && (
               <span className="badge badge-neutral text-xs">{event.metadata.userRole}</span>
             )}
             {event.metadata?.source && (
-              <span className="text-xs text-muted">via {event.metadata.source}</span>
+              <span className="text-xs text-muted flex items-center gap-1">
+                <Server size={12} /> via {event.metadata.source}
+              </span>
             )}
           </div>
 
           {/* Quick summary */}
           {!expanded && event.payload && (
-            <div className="text-sm text-muted" style={{ marginTop: 8 }}>
-              {event.eventType === 'TEMPERATURE_RECORDED' && `🌡️ ${event.payload.value}°${event.payload.unit}${event.payload.alert ? ' ⚠️ ALERT' : ''}`}
-              {event.eventType === 'LOCATION_UPDATED' && `📍 ${event.payload.city}, ${event.payload.country}`}
-              {event.eventType === 'ITEM_ADDED' && `📦 ${event.payload.name} × ${event.payload.quantity}`}
-              {event.eventType === 'STATUS_CHANGED' && `→ ${event.payload.status}`}
-              {event.eventType === 'DELIVERED' && `✅ Delivered at ${event.payload.deliveredAt ? format(new Date(event.payload.deliveredAt), 'MMM d, HH:mm') : '—'}`}
-              {event.eventType === 'DELAYED' && `Reason: ${event.payload.reason}`}
+            <div className="text-sm text-muted flex items-center gap-2" style={{ marginTop: 8 }}>
+              {event.eventType === 'TEMPERATURE_RECORDED' && <><Thermometer size={14} /> {event.payload.value}°{event.payload.unit}{event.payload.alert ? <span className="flex items-center gap-1 text-danger ml-1"><AlertTriangle size={14} color="var(--danger)" /> ALERT</span> : ''}</>}
+              {event.eventType === 'LOCATION_UPDATED' && <><MapPin size={14} /> {event.payload.city}, {event.payload.country}</>}
+              {event.eventType === 'ITEM_ADDED' && <><Package size={14} /> {event.payload.name} × {event.payload.quantity}</>}
+              {event.eventType === 'STATUS_CHANGED' && <><RotateCw size={14} /> {event.payload.status}</>}
+              {event.eventType === 'DELIVERED' && <><CheckCircle2 size={14} /> Delivered at {event.payload.deliveredAt ? format(new Date(event.payload.deliveredAt), 'MMM d, HH:mm') : '—'}</>}
+              {event.eventType === 'DELAYED' && <span className="flex items-center gap-1"><AlertTriangle size={14} /> Reason: {event.payload.reason}</span>}
             </div>
           )}
 
@@ -211,7 +218,7 @@ export default function TimelinePage() {
           <div className="loading-center"><div className="spinner" /></div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📅</div>
+            <div className="empty-state-icon"><Clock3 size={32} /></div>
             <h3>No events found</h3>
             <p>Select a shipment to view its event timeline</p>
           </div>

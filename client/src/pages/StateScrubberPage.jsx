@@ -1,16 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import api from '../api/axios';
+import { Search, History, MapPin, CheckCircle2, ArrowDown } from 'lucide-react';
 
 const STATUS_COLORS = {
-  PENDING: '#f59e0b', PROCESSING: '#3b82f6', IN_TRANSIT: '#6366f1',
-  AT_PORT: '#8b5cf6', DELIVERED: '#10b981', DELAYED: '#ef4444', CANCELLED: '#6b7280',
+  PENDING:    '#92989B',
+  PROCESSING: '#687076',
+  IN_TRANSIT: '#111315',
+  AT_PORT:    '#5D7585',
+  DELIVERED:  '#2F6F6D',
+  DELAYED:    '#B18445',
+  CANCELLED:  '#A65D5D',
 };
 
 function ShipmentSnapshot({ state, targetVersion, eventCount }) {
   if (!state) return (
     <div className="empty-state">
-      <div className="empty-state-icon">🔍</div>
+      <div className="empty-state-icon"><Search size={32} /></div>
       <p>Move the slider to see shipment state</p>
     </div>
   );
@@ -21,8 +27,8 @@ function ShipmentSnapshot({ state, targetVersion, eventCount }) {
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
         <div style={{
           width: 12, height: 12, borderRadius: '50%',
-          background: STATUS_COLORS[state.status] || '#6366f1',
-          boxShadow: `0 0 8px ${STATUS_COLORS[state.status] || '#6366f1'}`,
+          background: STATUS_COLORS[state.status] || '#ffffff',
+          boxShadow: `0 0 8px ${STATUS_COLORS[state.status] || '#ffffff'}`,
         }} />
         <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{state.status}</span>
         <span className="badge badge-neutral" style={{ marginLeft: 'auto' }}>v{state.currentVersion}</span>
@@ -32,12 +38,12 @@ function ShipmentSnapshot({ state, targetVersion, eventCount }) {
       {/* Route */}
       <div className="card" style={{ padding: '14px 16px' }}>
         <div className="text-xs text-muted mb-1" style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>Route</div>
-        <div className="text-secondary text-sm">
-          📍 {state.origin?.city || '—'}, {state.origin?.country || '—'}
+        <div className="text-secondary text-sm flex items-center gap-2">
+          <MapPin size={14} /> {state.origin?.city || '—'}, {state.origin?.country || '—'}
         </div>
-        <div style={{ margin: '4px 0', color: 'var(--text-muted)' }}>↓</div>
-        <div className="text-secondary text-sm">
-          🏁 {state.destination?.city || '—'}, {state.destination?.country || '—'}
+        <div style={{ margin: '4px 0', color: 'var(--text-muted)', display: 'flex' }}><ArrowDown size={14} /></div>
+        <div className="text-secondary text-sm flex items-center gap-2">
+          <CheckCircle2 size={14} /> {state.destination?.city || '—'}, {state.destination?.country || '—'}
         </div>
       </div>
 
@@ -76,17 +82,17 @@ function ShipmentSnapshot({ state, targetVersion, eventCount }) {
           <div className="flex gap-4">
             <div>
               <div className="text-xs text-muted">Min</div>
-              <div className="font-semibold" style={{ color: '#3b82f6' }}>{state.temperatureMin}°C</div>
+              <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{state.temperatureMin}°C</div>
             </div>
             <div>
               <div className="text-xs text-muted">Max</div>
-              <div className="font-semibold" style={{ color: state.temperatureMax > 8 ? '#ef4444' : '#10b981' }}>
+              <div className="font-semibold" style={{ color: state.temperatureMax > 8 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                 {state.temperatureMax}°C
               </div>
             </div>
             <div>
               <div className="text-xs text-muted">Alerts</div>
-              <div className="font-semibold" style={{ color: state.temperatureAlertCount > 0 ? '#ef4444' : '#10b981' }}>
+              <div className="font-semibold" style={{ color: state.temperatureAlertCount > 0 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                 {state.temperatureAlertCount}
               </div>
             </div>
@@ -98,8 +104,8 @@ function ShipmentSnapshot({ state, targetVersion, eventCount }) {
       {state.currentLocation && (
         <div className="card" style={{ padding: '14px 16px' }}>
           <div className="text-xs text-muted mb-1" style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Location</div>
-          <div className="font-semibold">📍 {state.currentLocation.city}</div>
-          <div className="text-muted text-sm">{state.currentLocation.country}</div>
+          <div className="font-semibold flex items-center gap-2"><MapPin size={14} /> {state.currentLocation.city}</div>
+          <div className="text-muted text-sm" style={{ paddingLeft: 22 }}>{state.currentLocation.country}</div>
         </div>
       )}
 
@@ -228,7 +234,7 @@ export default function StateScrubberPage() {
             onChange={(e) => setTargetVersion(Number(e.target.value))}
             style={{
               width: '100%', height: 6, cursor: 'pointer',
-              accentColor: 'var(--accent)', borderRadius: 3,
+              accentColor: 'var(--text-primary)', borderRadius: 3,
             }}
           />
 
@@ -246,9 +252,9 @@ export default function StateScrubberPage() {
                 onClick={() => setTargetVersion(ev.version)}
                 style={{
                   padding: '3px 10px',
-                  background: ev.version === targetVersion ? 'var(--accent)' : 'var(--bg-elevated)',
-                  color: ev.version === targetVersion ? 'white' : 'var(--text-muted)',
-                  border: `1px solid ${ev.version === targetVersion ? 'var(--accent)' : 'var(--border)'}`,
+                  background: ev.version === targetVersion ? 'var(--text-primary)' : 'var(--bg-elevated)',
+                  color: ev.version === targetVersion ? 'var(--bg-base)' : 'var(--text-muted)',
+                  border: `1px solid ${ev.version === targetVersion ? 'var(--text-primary)' : 'var(--border)'}`,
                   fontSize: '0.7rem',
                 }}
                 title={`v${ev.version}: ${ev.eventType}`}
@@ -263,7 +269,7 @@ export default function StateScrubberPage() {
       {/* State snapshot */}
       <div className="card">
         <div className="card-title">
-          🕐 Shipment State at Version {targetVersion}
+          <History size={18} className="text-secondary" /> Shipment State at Version {targetVersion}
           {loadingState && <span className="spinner spinner-sm" style={{ marginLeft: 8 }} />}
         </div>
         <ShipmentSnapshot state={state} targetVersion={targetVersion} eventCount={events.length} />

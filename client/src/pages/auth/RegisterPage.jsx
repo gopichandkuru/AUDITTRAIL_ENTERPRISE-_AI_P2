@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { ShieldCheck, AlertTriangle, ArrowRight } from 'lucide-react';
 import './Auth.css';
 
 export default function RegisterPage() {
@@ -29,7 +30,7 @@ export default function RegisterPage() {
 
       <div className="auth-container">
         <div className="auth-logo">
-          <div className="auth-logo-icon">🛡</div>
+          <div className="auth-logo-icon flex items-center justify-center"><ShieldCheck size={36} className="text-accent" /></div>
           <div>
             <div className="auth-logo-title">AuditTrail</div>
             <div className="auth-logo-sub">Enterprise AI</div>
@@ -41,7 +42,7 @@ export default function RegisterPage() {
           <p className="auth-subtitle">Join your team's audit monitoring platform</p>
 
           {error && (
-            <div className="auth-error"><span>⚠</span> {error}</div>
+            <div className="auth-error flex items-center gap-2"><AlertTriangle size={16} /> {error}</div>
           )}
 
           <form onSubmit={handleSubmit} className="auth-form">
@@ -91,8 +92,8 @@ export default function RegisterPage() {
               </select>
             </div>
 
-            <button type="submit" className="btn btn-primary auth-submit-btn" disabled={isLoading}>
-              {isLoading ? <><span className="spinner spinner-sm" /> Creating account...</> : 'Create Account →'}
+            <button type="submit" className="btn btn-primary auth-submit-btn flex items-center justify-center gap-2" disabled={isLoading}>
+              {isLoading ? <><span className="spinner spinner-sm" /> Creating account...</> : <>Create Account <ArrowRight size={16} /></>}
             </button>
           </form>
 

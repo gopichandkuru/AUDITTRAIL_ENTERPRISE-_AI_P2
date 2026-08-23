@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useUIStore } from '../store/uiStore';
 import { format } from 'date-fns';
+import { Bell, Pause, Play, Trash2, AlertOctagon, AlertTriangle, Plus, X, Check } from 'lucide-react';
 
 const DEFAULT_RULE = {
   name: '', description: '', severity: 'WARNING',
@@ -102,8 +103,8 @@ export default function AlertsPage() {
           <h1 className="page-title">Alerts</h1>
           <p className="page-subtitle">Configure alert rules and view notifications</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          + New Alert Rule
+        <button className="btn btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
+          <Plus size={14} /> New Alert Rule
         </button>
       </div>
 
@@ -128,10 +129,10 @@ export default function AlertsPage() {
           {rules.length === 0 ? (
             <div className="card">
               <div className="empty-state">
-                <div className="empty-state-icon">🔔</div>
+                <div className="empty-state-icon"><Bell size={32} /></div>
                 <h3>No alert rules yet</h3>
                 <p>Create your first rule to start monitoring events</p>
-                <button className="btn btn-primary btn-sm" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}>+ Create Rule</button>
+                <button className="btn btn-primary btn-sm flex items-center gap-2" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={14} /> Create Rule</button>
               </div>
             </div>
           ) : (
@@ -151,7 +152,7 @@ export default function AlertsPage() {
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>{rule.description}</div>
                       <div className="flex gap-3" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                        <span>When <strong style={{ color: 'var(--text-primary)' }}>{rule.condition.field}</strong> {rule.condition.operator} <strong style={{ color: 'var(--accent-light)' }}>{String(rule.condition.value)}</strong></span>
+                        <span>When <strong style={{ color: 'var(--text-primary)' }}>{rule.condition.field}</strong> {rule.condition.operator} <strong style={{ color: 'var(--text-primary)' }}>{String(rule.condition.value)}</strong></span>
                         {rule.triggerCount > 0 && (
                           <span>· Triggered <strong style={{ color: 'var(--text-primary)' }}>{rule.triggerCount}</strong> times</span>
                         )}
@@ -162,10 +163,10 @@ export default function AlertsPage() {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        className={`btn btn-sm ${rule.isActive ? 'btn-secondary' : 'btn-primary'}`}
+                        className={`btn btn-sm flex items-center gap-1 ${rule.isActive ? 'btn-secondary' : 'btn-primary'}`}
                         onClick={() => toggleRule(rule)}
-                      >{rule.isActive ? '⏸ Pause' : '▶ Enable'}</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => deleteRule(rule._id)}>🗑</button>
+                      >{rule.isActive ? <><Pause size={14} /> Pause</> : <><Play size={14} /> Enable</>}</button>
+                      <button className="btn btn-secondary btn-sm flex items-center justify-center text-danger hover-danger" onClick={() => deleteRule(rule._id)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                 </div>
@@ -180,14 +181,14 @@ export default function AlertsPage() {
               {notifs.filter((n) => !n.read).length} unread notifications
             </span>
             {notifs.some((n) => !n.read) && (
-              <button className="btn btn-secondary btn-sm" onClick={markAllRead}>✓ Mark all read</button>
+              <button className="btn btn-secondary btn-sm flex items-center gap-2" onClick={markAllRead}><Check size={14} /> Mark all read</button>
             )}
           </div>
 
           {[...notifications, ...notifs].length === 0 ? (
             <div className="card">
               <div className="empty-state">
-                <div className="empty-state-icon">🔔</div>
+                <div className="empty-state-icon"><Bell size={32} /></div>
                 <h3>No notifications</h3>
                 <p>Alert notifications will appear here when rules are triggered</p>
               </div>
@@ -198,11 +199,13 @@ export default function AlertsPage() {
               {notifications.map((n, i) => (
                 <div key={`rt-${i}`} className="card" style={{
                   padding: '14px 18px',
-                  borderLeft: `3px solid ${n.severity === 'CRITICAL' ? 'var(--critical)' : n.severity === 'WARNING' ? 'var(--warning)' : 'var(--info)'}`,
-                  background: 'rgba(99,102,241,0.05)',
+                  borderLeft: `3px solid ${n.severity === 'CRITICAL' ? 'var(--text-primary)' : 'var(--text-secondary)'}`,
+                  background: 'var(--bg-elevated)',
                 }}>
                   <div className="flex items-center gap-3">
-                    <span style={{ fontSize: '1rem' }}>{n.severity === 'CRITICAL' ? '🚨' : '⚠'}</span>
+                    <span style={{ display: 'flex', color: n.severity === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)' }}>
+                      {n.severity === 'CRITICAL' ? <AlertOctagon size={20} /> : <AlertTriangle size={20} />}
+                    </span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{n.title}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>{n.message}</div>
@@ -216,10 +219,12 @@ export default function AlertsPage() {
                 <div key={n._id} className="card" style={{
                   padding: '14px 18px',
                   opacity: n.read ? 0.65 : 1,
-                  borderLeft: `3px solid ${n.severity === 'CRITICAL' ? 'var(--critical)' : n.severity === 'WARNING' ? 'var(--warning)' : 'var(--info)'}`,
+                  borderLeft: `3px solid ${n.severity === 'CRITICAL' ? 'var(--text-primary)' : 'var(--text-secondary)'}`,
                 }}>
                   <div className="flex items-center gap-3">
-                    <span style={{ fontSize: '1rem' }}>{n.severity === 'CRITICAL' ? '🚨' : '⚠'}</span>
+                    <span style={{ display: 'flex', color: n.severity === 'CRITICAL' ? 'var(--danger)' : 'var(--warning)' }}>
+                      {n.severity === 'CRITICAL' ? <AlertOctagon size={20} /> : <AlertTriangle size={20} />}
+                    </span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{n.title}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 2 }}>{n.message}</div>
@@ -227,7 +232,7 @@ export default function AlertsPage() {
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0 }}>
                       {format(new Date(n.createdAt), 'MMM d, HH:mm')}
                     </div>
-                    {!n.read && <span className="dot dot-pulse" style={{ background: 'var(--accent)' }} />}
+                    {!n.read && <span className="dot dot-pulse" style={{ background: 'var(--text-primary)' }} />}
                   </div>
                 </div>
               ))}
@@ -242,7 +247,7 @@ export default function AlertsPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">Create Alert Rule</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={18} /></button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

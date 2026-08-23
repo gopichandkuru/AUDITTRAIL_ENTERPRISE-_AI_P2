@@ -7,7 +7,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-main);
 }
 
 .auth-bg {
@@ -26,7 +26,7 @@
 .orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, #6366f1, transparent 70%);
+  background: radial-gradient(circle, rgba(47, 111, 109, 0.08), transparent 70%);
   top: -150px;
   right: -100px;
   animation: orbFloat 8s ease-in-out infinite;
@@ -35,7 +35,7 @@
 .orb-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #8b5cf6, transparent 70%);
+  background: radial-gradient(circle, rgba(47, 111, 109, 0.04), transparent 70%);
   bottom: -100px;
   left: -100px;
   animation: orbFloat 10s ease-in-out infinite reverse;
@@ -45,9 +45,10 @@
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 48px 48px;
+  opacity: 0.5;
 }
 
 @keyframes orbFloat {
@@ -76,13 +77,15 @@
 .auth-logo-icon {
   width: 52px;
   height: 52px;
-  background: var(--gradient-primary);
+  background: var(--bg-elevated);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  box-shadow: var(--shadow-sm);
+  color: var(--accent);
+  border: 1px solid var(--border);
 }
 
 .auth-logo-title {
@@ -95,19 +98,18 @@
 .auth-logo-sub {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--accent-light);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 
 .auth-card {
   width: 100%;
-  background: rgba(17, 18, 32, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 36px 32px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .auth-title {
@@ -125,9 +127,9 @@
 }
 
 .auth-error {
-  background: var(--critical-dim);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: var(--bg-main);
+  border: 1px solid var(--danger);
+  color: var(--danger);
   padding: 12px 16px;
   border-radius: var(--radius-md);
   font-size: 0.85rem;
@@ -193,13 +195,13 @@
 }
 
 .auth-link {
-  color: var(--accent-light);
+  color: var(--text-primary);
   font-weight: 500;
   transition: var(--transition);
 }
 
 .auth-link:hover {
-  color: #a5b4fc;
+  color: var(--text-secondary);
   text-decoration: underline;
 }
 
@@ -213,7 +215,7 @@
 .auth-feature-tag {
   font-size: 0.72rem;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   padding: 4px 12px;

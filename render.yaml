@@ -1,7 +1,7 @@
 services:
-  # ─── Backend API ───────────────────────────────────────────────────
+  # ─── Backend API ──────────────────────────────────────────────────────────
   - type: web
-    name: audittrail-enterprise-api
+    name: audittrail-enterprise
     env: node
     region: oregon
     plan: free
@@ -18,18 +18,16 @@ services:
       - key: JWT_EXPIRES
         value: 15m
       - key: MONGODB_URI
-        sync: false   # Set manually in Render dashboard
+        sync: false
       - key: GEMINI_API_KEY
-        sync: false   # Set manually in Render dashboard
+        sync: false
       - key: CLIENT_URL
-        sync: false   # Set to your frontend Render URL
+        sync: false
 
   # ─── Frontend Static Site ──────────────────────────────────────────
   - type: web
     name: audittrail-enterprise-ui
     env: static
-   
-   
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
     pullRequestPreviewsEnabled: true
@@ -37,6 +35,11 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://audittrail-enterprise.onrender.com/api
+      - key: VITE_SOCKET_URL
+        value: https://audittrail-enterprise.onrender.com
     headers:
       - path: /*
         name: X-Frame-Options

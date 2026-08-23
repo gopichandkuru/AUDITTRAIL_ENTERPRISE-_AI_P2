@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { useUIStore } from '../store/uiStore';
 import SeverityBadge from '../components/ui/SeverityBadge';
 import { format } from 'date-fns';
+import { Bot, Sparkles, Search, Zap, ShieldAlert, CheckCircle2, FileText, Target, Activity } from 'lucide-react';
 
 export default function AIInsightsPage() {
   const { showToast } = useUIStore();
@@ -88,13 +89,13 @@ export default function AIInsightsPage() {
   return (
     <div className="page-wrapper fade-in">
       <div className="page-header">
-        <h1 className="page-title">🤖 AI Insights</h1>
+        <h1 className="page-title flex items-center gap-2"><Bot size={28} className="text-secondary" /> AI Insights</h1>
         <p className="page-subtitle">Gemini-powered anomaly detection, natural language querying, and risk analysis</p>
       </div>
 
       {/* AI Badge */}
-      <div className="alert-banner info" style={{ marginBottom: 24 }}>
-        <span style={{ fontSize: '1.2rem' }}>✨</span>
+      <div className="alert-banner info" style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <span style={{ display: 'flex', color: 'var(--accent)' }}><Sparkles size={20} /></span>
         <span>
           <strong>Gemini AI</strong> — Add your <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 4 }}>GEMINI_API_KEY</code> to <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 4 }}>server/.env</code> for full AI features. Statistical analysis always runs without a key.
         </span>
@@ -104,7 +105,7 @@ export default function AIInsightsPage() {
         {/* Natural Language Query */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span>🔍</span> Natural Language Query
+            <Search size={16} className="text-secondary" /> Natural Language Query
           </div>
           <p className="text-secondary" style={{ fontSize: '0.85rem', marginBottom: 16 }}>
             Ask questions about your audit logs in plain English
@@ -118,8 +119,8 @@ export default function AIInsightsPage() {
               onChange={(e) => setNlQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && runQuery()}
             />
-            <button className="btn btn-primary" onClick={runQuery} disabled={queryLoading || !nlQuery.trim()}>
-              {queryLoading ? <><span className="spinner spinner-sm" /> Querying…</> : '⚡ Run Query'}
+            <button className="btn btn-primary flex items-center gap-2" onClick={runQuery} disabled={queryLoading || !nlQuery.trim()}>
+              {queryLoading ? <><span className="spinner spinner-sm" /> Querying…</> : <><Zap size={14} /> Run Query</>}
             </button>
           </div>
 
@@ -139,7 +140,7 @@ export default function AIInsightsPage() {
           {queryResult && (
             <>
               <div className="ai-response">
-                <div className="ai-response-label">✨ AI Response</div>
+                <div className="ai-response-label flex items-center gap-2"><Sparkles size={14} /> AI Response</div>
                 <div style={{ marginBottom: 8, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {queryResult.explanation} — <strong style={{ color: 'var(--text-primary)' }}>{queryResult.count} events</strong> found
                 </div>
@@ -173,24 +174,24 @@ export default function AIInsightsPage() {
 
         {/* Anomaly Detection */}
         <div className="card">
-          <div className="card-title">🚨 Anomaly Detection</div>
+          <div className="card-title flex items-center gap-2"><ShieldAlert size={16} className="text-secondary" /> Anomaly Detection</div>
           <p className="text-secondary" style={{ fontSize: '0.85rem', marginBottom: 16 }}>
             AI scans the last 24h of logs for suspicious patterns
           </p>
-          <button className="btn btn-primary btn-sm" onClick={detectAnomalies} disabled={anomalyLoading}>
-            {anomalyLoading ? <><span className="spinner spinner-sm" /> Analyzing…</> : '🔍 Detect Anomalies'}
+          <button className="btn btn-primary btn-sm flex items-center gap-2" onClick={detectAnomalies} disabled={anomalyLoading}>
+            {anomalyLoading ? <><span className="spinner spinner-sm" /> Analyzing…</> : <><Search size={14} /> Detect Anomalies</>}
           </button>
 
           {anomalies && (
             <div style={{ marginTop: 16 }}>
               <div className="ai-response" style={{ marginBottom: 16 }}>
-                <div className="ai-response-label">✨ AI Summary</div>
+                <div className="ai-response-label flex items-center gap-2"><Sparkles size={14} /> AI Summary</div>
                 {anomalies.summary}
               </div>
 
               {anomalies.anomalies?.length === 0 ? (
                 <div className="empty-state" style={{ padding: 24 }}>
-                  <div className="empty-state-icon">✅</div>
+                  <div className="empty-state-icon"><CheckCircle2 size={32} /></div>
                   <h3>No anomalies detected</h3>
                   <p>Activity looks normal in the last 24 hours</p>
                 </div>
@@ -216,7 +217,7 @@ export default function AIInsightsPage() {
 
         {/* Activity Summary */}
         <div className="card">
-          <div className="card-title">📄 Executive Summary</div>
+          <div className="card-title flex items-center gap-2"><FileText size={16} className="text-secondary" /> Executive Summary</div>
           <p className="text-secondary" style={{ fontSize: '0.85rem', marginBottom: 16 }}>
             Generate an AI-written compliance summary for any time range
           </p>
@@ -234,14 +235,14 @@ export default function AIInsightsPage() {
                 style={{ colorScheme: 'dark' }} />
             </div>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={generateSummary} disabled={summaryLoading}>
-            {summaryLoading ? <><span className="spinner spinner-sm" /> Generating…</> : '✍ Generate Summary'}
+          <button className="btn btn-primary btn-sm flex items-center gap-2" onClick={generateSummary} disabled={summaryLoading}>
+            {summaryLoading ? <><span className="spinner spinner-sm" /> Generating…</> : <><Sparkles size={14} /> Generate Summary</>}
           </button>
 
           {summary && (
             <div style={{ marginTop: 16 }}>
               <div className="ai-response">
-                <div className="ai-response-label">✨ Executive Summary</div>
+                <div className="ai-response-label flex items-center gap-2"><Sparkles size={14} /> Executive Summary</div>
                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, margin: 0, fontSize: '0.88rem' }}>
                   {summary.summary}
                 </p>
@@ -270,15 +271,15 @@ export default function AIInsightsPage() {
         {/* User Risk Scores */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <div className="card-title" style={{ margin: 0 }}>🎯 User Risk Scores (7d)</div>
-            <button className="btn btn-secondary btn-sm" onClick={loadRiskScores} disabled={riskLoading}>
-              {riskLoading ? <><span className="spinner spinner-sm" /> Loading…</> : '📊 Load Risk Scores'}
+            <div className="card-title flex items-center gap-2" style={{ margin: 0 }}><Target size={18} className="text-secondary" /> User Risk Scores (7d)</div>
+            <button className="btn btn-secondary btn-sm flex items-center gap-2" onClick={loadRiskScores} disabled={riskLoading}>
+              {riskLoading ? <><span className="spinner spinner-sm" /> Loading…</> : <><Activity size={14} /> Load Risk Scores</>}
             </button>
           </div>
 
           {riskScores ? (
             riskScores.length === 0 ? (
-              <div className="empty-state"><div className="empty-state-icon">✅</div><h3>No risk data</h3></div>
+              <div className="empty-state"><div className="empty-state-icon"><CheckCircle2 size={32} /></div><h3>No risk data</h3></div>
             ) : (
               <div className="table-wrapper" style={{ border: 'none' }}>
                 <table className="data-table">
@@ -318,7 +319,7 @@ export default function AIInsightsPage() {
             )
           ) : (
             <div className="empty-state">
-              <div className="empty-state-icon">🎯</div>
+              <div className="empty-state-icon"><Target size={32} /></div>
               <h3>Load risk scores</h3>
               <p>Click the button above to compute AI risk scores for all users</p>
             </div>
