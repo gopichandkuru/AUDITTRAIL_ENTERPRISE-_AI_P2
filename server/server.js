@@ -57,13 +57,17 @@ const io = new Server(server, {
 });
 
 // ─── Security Middleware ───────────────────────────────────────────────────
+app.set('trust proxy', 1); // Trust first proxy (Render load balancer) for correct req.ip
+
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
   contentSecurityPolicy: false, // Disabled so frontend can load
 }));
 
 app.use(cors({
-  origin: (origin, callback) => callback(null, true),
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.CLIENT_URL 
+    : (origin, callback) => callback(null, true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Expected-Version', 'X-API-Key', 'X-Source'],
@@ -74,7 +78,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(mongoSanitize()); // Prevent NoSQL injection
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(generalLimiter);
+
+// Apply rate limiter ONLY to API routes, not static files!
+app.use('/api', generalLimiter);
 
 // ─── Attach Socket.IO to requests ─────────────────────────────────────────
 app.use((req, res, next) => {
