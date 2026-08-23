@@ -18,7 +18,9 @@ export function useSocket(onEvent) {
 
     // Reuse existing connection
     if (!socket) {
-      socket = io(window.location.origin, {
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+      socket = io(socketUrl, {
+        path: '/socket.io',
         auth: { token },
         transports: ['websocket', 'polling'],
         reconnectionDelay: 2000,
