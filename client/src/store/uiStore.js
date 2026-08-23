@@ -6,6 +6,7 @@ export const useUIStore = create(
     (set, get) => ({
       theme: 'dark',
       notifications: [],
+      unreadCount: 0,
       sidebarOpen: true,
 
       toggleTheme: () => {
@@ -18,10 +19,17 @@ export const useUIStore = create(
         const id = Date.now().toString();
         set((s) => ({
           notifications: [{ ...notification, id }, ...s.notifications].slice(0, 50),
+          unreadCount: s.unreadCount + 1,
         }));
         // Auto-remove after 5 seconds (for toast style)
         setTimeout(() => get().removeNotification(id), 5000);
       },
+
+      showToast: (message, type = 'info') => {
+        get().addNotification({ message, type });
+      },
+
+      clearUnread: () => set({ unreadCount: 0 }),
 
       removeNotification: (id) => {
         set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) }));
