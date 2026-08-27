@@ -5,7 +5,7 @@ import { ShieldCheck, AlertTriangle, ArrowRight } from 'lucide-react';
 import './Auth.css';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'viewer' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'viewer' });
   const { register, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
@@ -16,6 +16,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      useAuthStore.setState({ error: 'Passwords do not match.' });
+      return;
+    }
     const result = await register(form.name, form.email, form.password, form.role);
     if (result.success) navigate('/dashboard');
   };
@@ -76,11 +80,24 @@ export default function RegisterPage() {
                 type="password"
                 name="password"
                 className="form-input"
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
                 value={form.password}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={8}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                className="form-input"
+                placeholder="Repeat password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+                minLength={8}
               />
             </div>
             <div className="form-group">

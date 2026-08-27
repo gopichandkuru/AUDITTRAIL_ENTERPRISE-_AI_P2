@@ -14,7 +14,7 @@ services:
       - key: PORT
         value: 10000
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_EXPIRES
         value: 15m
       - key: MONGODB_URI

@@ -10,6 +10,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'audittrail_enterprise_secret_key_2
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '15m';
 const REFRESH_EXPIRES_DAYS = 30;
 
+// ─── Safe auth logger — NEVER logs passwords, tokens, or secrets ─────────────
+const authLog = (event, data = {}) => {
+  console.log(`[AUTH][${new Date().toISOString()}] ${event}`, JSON.stringify(data));
+};
+
 const generateAccessToken = (userId) =>
   jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
 
@@ -37,24 +42,32 @@ const logAuditEvent = async (action, user, req, extra = {}) => {
 // POST /api/auth/register
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, role, department } = req.body;
+
+  authLog('REGISTER_REQUEST', { email, role });
+
   if (!name || !email || !password) {
     throw createError('Name, email, and password are required', 400);
   }
-  
+
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
     throw createError('Invalid email address', 400);
   }
-  
+
   if (password.length < 8) {
     throw createError('Password must contain at least 8 characters', 400);
   }
 
-  const existing = await User.findOne({ email });
+  const normalizedEmail = email.toLowerCase().trim();
+
+  authLog('REGISTER_USER_CHECK', { email: normalizedEmail });
+  const existing = await User.findOne({ email: normalizedEmail });
   if (existing) throw createError('An account with this email already exists.', 409);
 
   const user = await User.create({
-    name, email, password,
+    name: name.trim(),
+    email: normalizedEmail,
+    password,
     role: role || 'viewer',
     department,
     apiKey: uuidv4(),
@@ -71,6 +84,7 @@ const register = asyncHandler(async (req, res) => {
   });
 
   await logAuditEvent('REGISTER', user, req);
+  authLog('REGISTER_SUCCESS', { userId: user._id.toString(), email: normalizedEmail, role: user.role });
 
   res.status(201).json({
     success: true,
@@ -83,20 +97,32 @@ const register = asyncHandler(async (req, res) => {
 // POST /api/auth/login
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  authLog('LOGIN_REQUEST', { email });
+
   if (!email || !password) throw createError('Email and password are required', 400);
 
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.toLowerCase().trim();
+
+  authLog('USER_LOOKUP', { email: normalizedEmail });
+  const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
   if (!user) {
+    authLog('LOGIN_FAILURE', { email: normalizedEmail, reason: 'USER_NOT_FOUND' });
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 
+  authLog('PASSWORD_CHECK', { userId: user._id.toString() });
   const isMatch = await user.comparePassword(password);
+
   if (!isMatch) {
+    authLog('LOGIN_FAILURE', { email: normalizedEmail, reason: 'WRONG_PASSWORD' });
     await logAuditEvent('LOGIN_FAILED', user, req, { riskScore: 35 });
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 
   if (!user.isActive) {
+    authLog('LOGIN_FAILURE', { email: normalizedEmail, reason: 'ACCOUNT_DEACTIVATED' });
     return res.status(403).json({ success: false, error: 'Account deactivated. Contact your administrator.' });
   }
 
@@ -104,6 +130,7 @@ const login = asyncHandler(async (req, res) => {
   user.lastLoginIp = req.ip;
   await user.save();
 
+  authLog('JWT_CREATED', { userId: user._id.toString() });
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken();
 
@@ -115,6 +142,7 @@ const login = asyncHandler(async (req, res) => {
   });
 
   await logAuditEvent('LOGIN', user, req);
+  authLog('LOGIN_SUCCESS', { userId: user._id.toString(), email: normalizedEmail, role: user.role });
 
   res.json({
     success: true,
@@ -145,6 +173,7 @@ const refresh = asyncHandler(async (req, res) => {
   session.expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000);
   await session.save();
 
+  authLog('TOKEN_REFRESHED', { userId: user._id.toString() });
   res.json({ success: true, token: newAccessToken, refreshToken: newRefreshToken, user });
 });
 
@@ -160,6 +189,7 @@ const logout = asyncHandler(async (req, res) => {
     await Session.updateMany({ userId: req.user._id, refreshToken }, { isActive: false });
   }
   await logAuditEvent('LOGOUT', req.user, req);
+  authLog('LOGOUT', { userId: req.user._id.toString() });
   res.json({ success: true, message: 'Logged out successfully' });
 });
 

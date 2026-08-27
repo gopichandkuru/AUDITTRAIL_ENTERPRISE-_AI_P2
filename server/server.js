@@ -103,12 +103,18 @@ app.use('/api/ingest',    ingestRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
+  const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'AuditTrail Enterprise AI — Logistics Ledger',
-    dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     version: '2.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      state: dbStates[mongoose.connection.readyState] || 'unknown',
+      connected: mongoose.connection.readyState === 1,
+    },
+    uptime: Math.floor(process.uptime()),
   });
 });
 
@@ -136,18 +142,36 @@ const startServer = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
-      throw new Error('MONGODB_URI environment variable is missing.');
+      throw new Error('MONGODB_URI environment variable is missing. Set it in .env or Render environment variables.');
     }
 
     try {
       await mongoose.connect(mongoUri, {
-        serverSelectionTimeoutMS: 15000, // Increased timeout for slower connections
+        serverSelectionTimeoutMS: 20000,
         socketTimeoutMS: 45000,
+        connectTimeoutMS: 20000,
       });
-      console.log('✅ MongoDB Atlas connected');
+      console.log('✅ MongoDB connected');
     } catch (err) {
-      console.error('❌ MongoDB Atlas unreachable. Server cannot start.', err.message);
+      console.error('❌ MongoDB unreachable. Server cannot start.', err.message);
+      console.error('   → Check MONGODB_URI is correct and IP is whitelisted in Atlas.');
       process.exit(1);
+    }
+
+    // ─── Auto-seed demo data if DB is empty ──────────────────────────────
+    try {
+      const User = require('./src/models/User');
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        console.log('🌱 Empty database detected — running seed...');
+        const { seedAll } = require('./src/scripts/seed');
+        await seedAll();
+        console.log('✅ Seed complete — demo accounts ready');
+      } else {
+        console.log(`ℹ️  Database has ${userCount} user(s) — skipping seed`);
+      }
+    } catch (seedErr) {
+      console.warn('[Seed] Seed skipped or failed:', seedErr.message);
     }
 
     launchServer();

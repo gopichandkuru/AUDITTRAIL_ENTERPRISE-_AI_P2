@@ -102,16 +102,19 @@ export default function LoginPage() {
 
           {/* Demo accounts */}
           <div className="auth-demo">
-            <div className="auth-demo-label">Quick demo access</div>
+            <div className="auth-demo-label">Quick demo access (click to fill)</div>
             <div className="auth-demo-btns">
-              <button className="auth-demo-btn" onClick={() => fillDemo('admin')}>
+              <button type="button" className="auth-demo-btn" onClick={() => fillDemo('admin')} title="admin@audittrail.io / admin123">
                 <span className="badge badge-critical">Admin</span>
+                <span style={{ fontSize: '11px', opacity: 0.7, display: 'block', marginTop: '2px' }}>admin123</span>
               </button>
-              <button className="auth-demo-btn" onClick={() => fillDemo('auditor')}>
+              <button type="button" className="auth-demo-btn" onClick={() => fillDemo('auditor')} title="sarah@audittrail.io / auditor123">
                 <span className="badge badge-warning">Auditor</span>
+                <span style={{ fontSize: '11px', opacity: 0.7, display: 'block', marginTop: '2px' }}>auditor123</span>
               </button>
-              <button className="auth-demo-btn" onClick={() => fillDemo('viewer')}>
+              <button type="button" className="auth-demo-btn" onClick={() => fillDemo('viewer')} title="marcus@audittrail.io / viewer123">
                 <span className="badge badge-info">Viewer</span>
+                <span style={{ fontSize: '11px', opacity: 0.7, display: 'block', marginTop: '2px' }}>viewer123</span>
               </button>
             </div>
           </div>
