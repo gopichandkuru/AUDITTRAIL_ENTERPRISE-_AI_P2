@@ -1,7 +1,7 @@
 services:
   # ─── Backend API ──────────────────────────────────────────────────────────
   - type: web
-    name: audittrail-enterprise
+    name: audittrail-enterprise-api
     env: node
     region: oregon
     plan: free
@@ -22,7 +22,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: CLIENT_URL
-        sync: false
+        value: https://audittrail-enterprise-ui.onrender.com
 
   # ─── Frontend Static Site ──────────────────────────────────────────
   - type: web
@@ -37,9 +37,9 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://audittrail-enterprise.onrender.com/api
+        value: https://audittrail-enterprise-api.onrender.com/api
       - key: VITE_SOCKET_URL
-        value: https://audittrail-enterprise.onrender.com
+        value: https://audittrail-enterprise-api.onrender.com
     headers:
       - path: /*
         name: X-Frame-Options
