@@ -1,3 +1,5 @@
+const dns = require('dns');
+try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch (_) {}
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -259,14 +261,12 @@ const seedAuditLogs = async (users) => {
 };
 
 // ─── Main seed function ───────────────────────────────────────────────────
+const { seedDemoData } = require('./seedDemo');
+
 const seedAll = async () => {
   try {
     console.log('🌱 Seeding database...');
-    const users = await seedUsers();
-    const admin = users.find((u) => u.role === 'admin') || users[0];
-    await seedAlertRules(admin);
-    await seedShipments(users);
-    await seedAuditLogs(users);
+    await seedDemoData();
     console.log('✅ Seed complete\n');
   } catch (err) {
     console.error('❌ Seed error:', err);
