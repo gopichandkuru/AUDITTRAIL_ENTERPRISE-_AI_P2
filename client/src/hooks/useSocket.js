@@ -14,7 +14,14 @@ export function useSocket(onEvent) {
   onEventRef.current = onEvent;
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      // Logout: disconnect and clean up
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+      }
+      return;
+    }
 
     // Reuse existing connection
     if (!socket) {
@@ -24,6 +31,7 @@ export function useSocket(onEvent) {
         auth: { token },
         transports: ['websocket', 'polling'],
         reconnectionDelay: 2000,
+        reconnectionAttempts: 5,
       });
     }
 

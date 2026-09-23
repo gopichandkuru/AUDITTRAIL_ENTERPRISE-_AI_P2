@@ -109,7 +109,7 @@ const seedShipments = async (users) => {
   }
 
   const admin = users.find((u) => u.role === 'admin') || users[0];
-  const scenarios = [
+  const baseScenarios = [
     // Scenario 1: Delivered electronics
     { status: 'DELIVERED', daysAgo: 12, items: [{ ...ITEMS_POOL[0], quantity: 500 }, { ...ITEMS_POOL[1], quantity: 2000 }] },
     // Scenario 2: In Transit with temperature alerts
@@ -131,6 +131,14 @@ const seedShipments = async (users) => {
     // Scenario 10: Recent delivery
     { status: 'DELIVERED', daysAgo: 2, items: [{ ...ITEMS_POOL[6], quantity: 500 }, { ...ITEMS_POOL[4], quantity: 100 }] },
   ];
+
+  // Repeat scenarios to generate 50 shipments for rich analytics
+  const scenarios = [];
+  for (let i = 0; i < 5; i++) {
+    for (const s of baseScenarios) {
+      scenarios.push({ ...s, daysAgo: Math.max(0, s.daysAgo + randomInt(-3, 3)) });
+    }
+  }
 
   const { projectShipmentEvent } = require('../projections/shipmentProjector');
 
@@ -227,7 +235,7 @@ const seedAuditLogs = async (users) => {
   const STATUSES = ['SUCCESS', 'SUCCESS', 'SUCCESS', 'FAILURE'];
   const SEVERITIES = ['INFO', 'INFO', 'WARNING', 'SUCCESS'];
 
-  const logs = Array.from({ length: 100 }, () => {
+  const logs = Array.from({ length: 500 }, () => {
     const user = randomFrom(users);
     return {
       eventId: uuidv4(),

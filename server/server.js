@@ -140,9 +140,18 @@ initSocket(io);
 // ─── MongoDB + Server Start ───────────────────────────────────────────────
 const startServer = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) {
-      throw new Error('MONGODB_URI environment variable is missing. Set it in .env or Render environment variables.');
+    let mongoUri = process.env.MONGODB_URI;
+
+    if (!mongoUri || mongoUri === 'memory') {
+      // Use in-memory MongoDB for local dev without a real URI
+      try {
+        const { MongoMemoryServer } = require('mongodb-memory-server');
+        const mongoServer = await MongoMemoryServer.create();
+        mongoUri = mongoServer.getUri();
+        console.log('🧠 Using in-memory MongoDB (no MONGODB_URI configured)');
+      } catch (memErr) {
+        throw new Error('No MONGODB_URI set and mongodb-memory-server failed: ' + memErr.message);
+      }
     }
 
     try {
@@ -153,9 +162,24 @@ const startServer = async () => {
       });
       console.log('✅ MongoDB connected');
     } catch (err) {
-      console.error('❌ MongoDB unreachable. Server cannot start.', err.message);
-      console.error('   → Check MONGODB_URI is correct and IP is whitelisted in Atlas.');
-      process.exit(1);
+      // If Atlas fails in production, don't silently fall through
+      if (process.env.NODE_ENV === 'production') {
+        console.error('❌ MongoDB unreachable. Server cannot start.', err.message);
+        console.error('   → Check MONGODB_URI is correct and IP is whitelisted in Atlas.');
+        process.exit(1);
+      }
+      // Dev fallback: try in-memory if Atlas is unreachable
+      console.warn('⚠️  Atlas unreachable, falling back to in-memory MongoDB for development...');
+      try {
+        const { MongoMemoryServer } = require('mongodb-memory-server');
+        const mongoServer = await MongoMemoryServer.create();
+        const memUri = mongoServer.getUri();
+        await mongoose.connect(memUri);
+        console.log('🧠 Using in-memory MongoDB fallback (Atlas was unreachable)');
+      } catch (fallbackErr) {
+        console.error('❌ Both Atlas and in-memory MongoDB failed. Server cannot start.');
+        process.exit(1);
+      }
     }
 
     // ─── Auto-seed demo data if DB is empty ──────────────────────────────
